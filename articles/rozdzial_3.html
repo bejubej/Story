@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rozdział</title>
+  <style>
+      /* Reset podstawowych stylów */
+      *, *::before, *::after {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+      }
+
+      /* Ciemna, klasyczna stylistyka */
+      body {
+          background-color: #121212; /* Głęboka czerń tła */
+          color: #e0e0e0;           /* Stonowana biel tekstu */
+          font-family: 'Georgia', 'Times New Roman', Times, serif; /* Klasyczny krój książkowy */
+          line-height: 1.75;
+          letter-spacing: 0.01em;
+          padding: 40px 20px;
+          display: flex;
+          justify-content: center;
+      }
+
+      /* Kontener ograniczający szerokość tekstu dla łatwego czytania */
+      .book-container {
+          max-width: 680px;
+          width: 100%;
+      }
+
+      /* Nagłówek rozdziału */
+      header {
+          margin-bottom: 3rem;
+          text-align: center;
+      }
+
+      .chapter-number {
+          font-size: 1.2rem;
+          font-style: italic;
+          color: #b39ddb;            /* Subtelny fioletowy akcent */
+          margin-bottom: 0.5rem;
+          display: block;
+      }
+
+      h1.chapter-title {
+          font-size: 2.2rem;
+          line-height: 1.3;
+          color: #ffffff;
+          font-weight: normal;
+      }
+
+      /* Treść rozdziału */
+      .chapter-content {
+          font-size: 1.15rem;
+          text-align: justify;      /* Klasyczne wyrównanie tekstu */
+          text-justify: inter-word;
+      }
+
+      .chapter-content p {
+          margin-bottom: 1.25rem;
+      }
+
+      /* Inicjał (Drop Cap) dla pierwszego akapitu */
+      .chapter-content p:first-of-type::first-letter {
+          font-size: 3.5rem;
+          float: left;
+          line-height: 1;
+          padding-right: 8px;
+          color: #b39ddb;
+      }
+
+      /* Cytat / Myśli (opcjonalnie) */
+      blockquote {
+          font-style: italic;
+          margin: 2rem 1.5rem;
+          padding-left: 1rem;
+          border-left: 2px solid #b39ddb;
+          color: #b0b0b0;
+      }
+
+      /* Separator sekcji (gwiazdki - opcjonalnie) */
+      .section-divider {
+          text-align: center;
+          margin: 3rem 0;
+          font-size: 1.2rem;
+          letter-spacing: 0.5em;
+          color: #555555;
+      }
+
+      /* Dopasowanie do ekranów telefonów */
+      @media (max-width: 600px) {
+          body { padding: 20px 15px; }
+          h1.chapter-title { font-size: 1.8rem; }
+          .chapter-content { font-size: 1.05rem; text-align: left; }
+          .chapter-content p:first-of-type::first-letter { font-size: 3rem; }
+      }
+  </style>
+</head>
+<body>
+
+<div class="book-container">
+
+  <header>
+    <span class="chapter-number">Rozdział III</span>
+  </header>
+
+  <main class="chapter-content">
+
+    <p>Wibracje potężnych silników Megastara nie przypominały niczego, co znałaś z podróży samochodem czy pociągiem. To był głęboki, basowy mruk, który rezonował bezpośrednio w klatce piersiowej. Gdy prom powoli odbijał od nabrzeża w Tallinnie, cała stalowa konstrukcja zaczęła zauważalnie, mocno drżeć, kiedy potężne silniki burtowe manewrowały w basenie portowym. Odruchowo, nieco mocniej chwyciłaś się oparcia fotela.  </p>
+    <blockquote>– Wszystko okej? – zapytał Bartek, odrywając na chwilę wzrok od telefonu i patrząc na Twoje napięte dłonie.</blockquote>
+
+    <blockquote>– Mocno trzęsie. Myślałam, że takie wielkie statki ruszają zupełnie płynnie – przyznałaś cicho. To był Twój absolutnie pierwszy rejs w życiu i choć bardzo chciałaś zobaczyć Helsinki, sam start wywołał w tobie lekki, podświadomy niepokój.</blockquote>
+<blockquote>– Daj spokój, to tylko silniki manewrowe na starcie, zaraz wyjdziemy z portu i nawet nie poczujesz, że płyniemy </blockquote>
+    <p>Bartek uśmiechnął się uspokajająco.</p>
+    <blockquote>– Megastar to luksusowy hotel. Płynąłem kiedyś takim starym rzęchem z Albanii do Włoch, tam to dopiero było kiepsko. Tutaj za chwilę zapomnisz, że jesteś na wodzie. Chodź, przejdziemy się po sklepach.</blockquote>
+
+    <p>Bartek miał rację. Gdy tylko statek opuścił basen portowy i wyszedł na otwartą wodę Zatoki Fińskiej, drżenie ustało, a prom zaczął płynąć tak stabilnie, jakby poruszał się po szynach. Twój lęk natychmiast ustąpił miejsca ciekawości.</p>
+
+    <p>Zgodnie z planem postanowiliście zrobić rundkę po ogromnym, dwupoziomowym pasażu handlowym. Dla kogoś, kto był na promie po raz pierwszy, jasne, sterylne wnętrza supermarketu duty-free i tak robiły wrażenie. Nie było tu jednak typowego, wakacyjnego tłumu turystów. Trwał środek szarego, chłodnego tygodnia poza sezonem. Między półkami kręcili się głównie fińscy emeryci, metodycznie zapełniający piwem i mocniejszym alkoholem plastikowe wózki na kółkach. Obok nich, z wielkimi torbami podróżnymi, przesuwali się zmęczeni estońscy robotnicy sezonowi wracający do pracy w Finlandii.</p>
+
+    <p>Spędziłaś dłuższą chwilę w dziale z perfumami, bez pośpiechu testując zapachy na papierowych paskach. Potem ruszyliście dalej, mijając kolejne strefy pokładu handlowego – jasne, eleganckie alejki z ubraniami, stojakami pełnymi okularów przeciwsłonecznych i gablotami z markowymi torebkami. Choć na dział alkoholowy nawet nie zajrzeliście, to z daleka widziałaś, że tamtejsze palety z trunkami cieszą się ogromnym popytem i przyciągają większość pasażerów. Dla Ciebie prawdziwy raj na ziemi zaczął się jednak kawałek dalej, w gigantycznej sekcji ze słodyczami. Kolorowe regały ciągnęły się niemal bez końca, a po krótkim przeglądzie do Waszego koszyka wpadło kilka opakowań lokalnych cukierków.</p>
+
+    <p>Tuż obok znajdowało się stoisko z pamiątkami, gdzie urocze, białe sylwetki Muminków patrzyły na Ciebie z emaliowanych kubków, magnesów, notesów i lnianych toreb. Zatrzymałaś się tam na dłuższą chwilę, z sentymentem oglądając mały, klasyczny kubek z grafiką przedstawiającą Włóczykija siedzącego na moście. Ostatecznie jednak, po krótkim wahaniu, odłożyłaś go z powrotem na półkę. Samo oglądanie tych wszystkich drobiazgów miało w sobie coś kojącego, ale tym razem postanowiłaś poprzestać na słodkich zapasach.</p>
+
+    <p>Po wyjściu ze sklepu znaleźliście wolne miejsca w ogólnej strefie siedzącej, tuż przy wielkich, panoramicznych oknach wychodzących na wzburzone morze. Za szybą szalał silny, porywisty wiatr, który gnał po ołowianej wodzie spienione grzywy fal, ale przynajmniej deszcz w końcu przestał padać. Tutaj, w ciepłym, jasnym wnętrzu promu, panował kojący spokój. Bartek z powrotem wsiąkł w ekran swojego telefonu, bezmyślnie przewijając rolki ze śmiesznymi zwierzętami na Instagramie, a Ty postanowiłaś wykorzystać najbliższe dwie godziny na lekturę.</p>
+
+    <p>Postawiłaś papierową torbę z cukierkami na podłodze, otworzyłaś plecak i wyciągnęłaś swój czytnik – ukochanego Kindle’a w rzucającym się w oczy etui z motywem „Gwieździstej nocy” Van Gogha. To było Twoje ulubione urządzenie – proste, bezpieczne, z ekranem z e-papieru, który nie męczył oczu i pozwalał całkowicie uciec od przebodźcowanego świata pełnego powiadomień.</p>
+
+<p>Wcisnęłaś przycisk zasilania. Ekran mignął charakterystyczną dla tej technologii czernią i uruchomił się na stronie z rozdziałem, który przerwałaś poprzedniego wieczoru. Odruchowo spojrzałaś w prawy, górny róg wyświetlacza, gdzie znajdowała się mała ikonka baterii, i zmarszczyłaś brwi.</p>
+
+    <p>50%</p>
+
+    <p>Stuknęłaś palcem w ekran, myśląc, że to jakiś chwilowy błąd odświeżania, ale cyfry nie kłamały. Wskaźnik uparcie pokazywał połowę pojemności akumulatora.</p>
+
+    <blockquote>– Bubuś? – odezwałaś się, nie odrywając wzroku od małego kwadracika na wyświetlaczu.</blockquote>
+    <blockquote>– Mmm? – mruknął, nawet nie podnosząc głowy znad kolejnego wyświetlającego się na ekranie kota.</blockquote>
+
+    <blockquote>– Ładowałeś wczoraj wieczorem w hotelu swój telefon z tej podwójnej ładowarki przy łóżku?</blockquote>
+
+    <blockquote>– No tak, a co?</blockquote>
+
+    <blockquote>– A pamiętasz, czy mój Kindle też był podpięty? Bo byłam pewna, że odłączałam go rano i miał równe sto procent.</blockquote>
+
+    <blockquote>– Na pewno był podpięty, pamiętam zieloną diodę – odpowiedział Bartek, tym razem zerkając na Ciebie na sekundę. – Może po prostu akumulator już siada? Albo zostawiłaś włączone Wi-Fi i zsynchronizował jakąś gigantyczną bazę książek w tle. Zresetuj go i tyle.</blockquote>
+
+    <p>Westchnęłaś cicho, wyłączyłaś łączność bezprzewodową w ustawieniach i oparłaś głowę o zagłówek fotela. Przez chwilę patrzyłaś przez panoramiczne okno na wzburzone, ciemne fale Bałtyku. Pewnie Bartek miał rację, sprzęt po prostu stawał się coraz starszy.</p>
+
+    <p>Nie miałaś jednak pojęcia, że procesor w Twoim małym urządzeniu, właśnie pracował na najwyższych możliwych obrotach, generując temperaturę, która powoli, stopień po stopniu, zaczynała rozgrzewać plastikową obudowę.</p>
+
+
+    <div class="section-divider">***</div>
+
+
+
+  </main>
+
+</div>
+
+</body>
+</html>

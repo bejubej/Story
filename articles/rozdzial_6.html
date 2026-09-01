@@ -1,0 +1,176 @@
+
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rozdział</title>
+  <style>
+      /* Reset podstawowych stylów */
+      *, *::before, *::after {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+      }
+
+      /* Ciemna, klasyczna stylistyka */
+      body {
+          background-color: #121212; /* Głęboka czerń tła */
+          color: #e0e0e0;           /* Stonowana biel tekstu */
+          font-family: 'Georgia', 'Times New Roman', Times, serif; /* Klasyczny krój książkowy */
+          line-height: 1.75;
+          letter-spacing: 0.01em;
+          padding: 40px 20px;
+          display: flex;
+          justify-content: center;
+      }
+
+      /* Kontener ograniczający szerokość tekstu dla łatwego czytania */
+      .book-container {
+          max-width: 680px;
+          width: 100%;
+      }
+
+      /* Nagłówek rozdziału */
+      header {
+          margin-bottom: 3rem;
+          text-align: center;
+      }
+
+      .chapter-number {
+          font-size: 1.2rem;
+          font-style: italic;
+          color: #b39ddb;            /* Subtelny fioletowy akcent */
+          margin-bottom: 0.5rem;
+          display: block;
+      }
+
+      h1.chapter-title {
+          font-size: 2.2rem;
+          line-height: 1.3;
+          color: #ffffff;
+          font-weight: normal;
+      }
+
+      /* Treść rozdziału */
+      .chapter-content {
+          font-size: 1.15rem;
+          text-align: justify;      /* Klasyczne wyrównanie tekstu */
+          text-justify: inter-word;
+      }
+
+      .chapter-content p {
+          margin-bottom: 1.25rem;
+      }
+
+      /* Inicjał (Drop Cap) dla pierwszego akapitu */
+      .chapter-content p:first-of-type::first-letter {
+          font-size: 3.5rem;
+          float: left;
+          line-height: 1;
+          padding-right: 8px;
+          color: #b39ddb;
+      }
+
+      /* Cytat / Myśli (opcjonalnie) */
+      blockquote {
+          font-style: italic;
+          margin: 2rem 1.5rem;
+          padding-left: 1rem;
+          border-left: 2px solid #b39ddb;
+          color: #b0b0b0;
+      }
+
+      /* Separator sekcji (gwiazdki - opcjonalnie) */
+      .section-divider {
+          text-align: center;
+          margin: 3rem 0;
+          font-size: 1.2rem;
+          letter-spacing: 0.5em;
+          color: #555555;
+      }
+
+      /* Dopasowanie do ekranów telefonów */
+      @media (max-width: 600px) {
+          body { padding: 20px 15px; }
+          h1.chapter-title { font-size: 1.8rem; }
+          .chapter-content { font-size: 1.05rem; text-align: left; }
+          .chapter-content p:first-of-type::first-letter { font-size: 3rem; }
+      }
+  </style>
+</head>
+<body>
+
+<div class="book-container">
+
+  <header>
+    <span class="chapter-number">Rozdział VI</span>
+
+  </header>
+
+  <main class="chapter-content">
+
+    <p>Miarowy stukot obcasów Liis i cięższy krok Aleksandra dudniły na stalowych schodach prowadzących z pokładu samochodowego. Gdy tylko minęli ciężkie drzwi przeciwpożarowe, uderzyła w nich fala ciepła, zapach parzonej kawy i gwar kilkuset ludzkich głosów. Pokład pasażerski żył swoim własnym, niespiesznym rytmem, zupełnie oderwanym od dramatycznych wydarzeń, które sprowadziły tu dwójkę oficerów KAPO.</p>
+    <p>Mäkinen natychmiast wyciągnął z kieszeni zmodyfikowany smartfon. Ekran znowu rozbłysnął siatką wykresów, ale wskaźniki wariowały jeszcze bardziej niż na dole.</p>
+
+    <blockquote>– I jak? – Liis rzuciła szybkie spojrzenie na wyświetlacz, jednocześnie lustrując wzrokiem najbliższe stoliki.</blockquote>
+
+    <blockquote>– Czysty chaos – warknął Aleksander, kalibrując aplikację w locie. – Przechodzimy w tryb pasywnego skanowania kierunkowego. Jeśli zbliżę telefon wystarczająco blisko źródła, algorytm powinien odsiać telefony pasażerów i wyizolować ten konkretny profil transmisji. Idziemy powoli, udajemy, że szukamy wolnego miejsca.</blockquote>
+
+    <p>Ruszyli główną aleją spacerową wzdłuż prawej burty statku, mijając kolejne strefy. Najpierw przeszli obok przeszklonego salonu biznesowego, gdzie kilkunastu biznesmenów w garniturach stukało w klawiatury laptopów. Aplikacja Aleksandra zamrugała na pomarańczowo, wykrywając zagęszczenie sieci Wi-Fi, ale sygnatura radiowa była czysta – standardowe, szyfrowane protokoły korporacyjne.</p>
+
+    <p>Kawałek dalej, w strefie z automatami do gier, minęli grupkę głośnych studentów otoczonych puszkami z napojami energetycznymi. Telefon w dłoni Mäkinena nawet nie drgnął.</p>
+
+    <blockquote>– Czas, Aleksander – przypomniała półgłosem Liis, zerkając na zegarek. Minęła właśnie kolejna cenna minuta, a kapitan promu przez głośniki poinformował, że minęli już punkt orientacyjny w połowie drogi do Helsinek. – Jeśli to urządzenie ma wysłać paczkę danych po zbliżeniu się do fińskiego brzegu, zostało nam niewiele ponad godzina.</blockquote>
+
+<blockquote>– Wiem – odpowiedział krótko, a na jego skroni pojawiła się kropla potu. – Spróbujmy bliżej dziobu. Tam jest największe skupisko ludzi.</blockquote>
+
+
+    <p>Weszli w szeroki, otwarty pasaż, gdzie na środku pyszniło się wielkie, żółto-czerwone logo Burger Kinga. Pachniało tam smażonymi frytkami i tanią kawą. Kolejka do kasy ciągnęła się na kilkanaście osób, a wokół stolików kręcili się ludzie z papierowymi torbami i plastikowymi tacami.</p>
+
+    <p>Mäkinen szedł powoli, trzymając telefon na wysokości klatki piersiowej, ukryty za skórzanym notesem. Nagle wykres na ekranie gwałtownie drgnął. Linia bazowa skoczyła w górę, a telefon zaczął pulsować w jego dłoni krótkimi wibracjami.</p>
+
+<blockquote>– Coś mam. Trzy metry przed nami, po lewej – szepnął Aleksander, blokując wzrok na celu.</blockquote>
+
+    <p>Przy małym stoliku pod oknem siedział młody chłopak w wyciągniętej bluzie z kapturem. Na uszach miał wielkie słuchawki, a przed nim leżał otwarty tablet oraz podpięty do niego grubym kablem dziwny, metalowy dysk z mrugającą na czerwono diodą. Chłopak pisał coś nerwowo na klawiaturze, co chwilę oglądając się za siebie.</p>
+
+    <p>Liis skinęła głową. Rozdzielili się podręcznikowo – ona zaszła stolik od strony okna, odcinając mu drogę ucieczki, on podszedł bezpośrednio od frontu.</p>
+
+    <blockquote>– Służba Bezpieczeństwa – rzucił Mäkinen cicho, ale twardo, kładąc dłoń z legitymacją tuż obok tabletu. – Proszę nie dotykać rąk od klawiatury i pokazać, co jest na tym dysku.</blockquote>
+
+    <p>Chłopak zesztywniał. Jego twarz momentalnie zrobiła się blada jak papier, a z uszu spadły mu słuchawki.</p>
+
+    <blockquote>– J-ja... ja tylko... – zaczął się jąkać, patrząc to na Aleksandra, to na Liis, która trzymała już dłoń pod połami płaszcza. – Ja tylko zgrywam materiał! Jestem vlogerem podróżniczym, obrabiam film z Tallinna! To jest bezprzewodowy dysk SSD, żebym mógł szybko zrzucać surówkę z drona!</blockquote>
+
+    <p>Mäkinen wyrwał mu telefon z rąk, spojrzał na aplikację, a potem na ekran tabletu chłopaka. Rzeczywiście – na wyświetlaczu widniał otwarty program do montażu wideo i pasek postępu eksportu pliku zatytułowany „Weekend w Estonii”.</p>
+
+
+<p>Aplikacja KAPO dała się nabrać na tani, chiński kontroler bezprzewodowy wbudowany w ten model dysku. Urządzenie miało uszkodzone ekranowanie i zamiast stabilnego Wi-Fi, siało w eter potężnymi, nieregularnymi impulsami na niestandardowym paśmie, idealnie imitując profil poszukiwanego nadajnika.</p>
+
+    <p>Aleksander wypuścił głośno powietrze przez nos i oddał chłopakowi urządzenie.</p>
+
+    <blockquote>– Proszę schować ten sprzęt do torby. Sieje zakłócenia w systemach statku – skłamał gładko Mäkinen, nawet nie mrugnąwszy okiem.</blockquote>
+
+    <p>Odeszli szybkim krokiem, zostawiając przerażonego YouTubera za sobą.</p>
+
+    <blockquote>– Kolejny ślepy zaułek – mruknęła Liis, zaciskając dłonie w pięści z bezsilności. – Połowa pasażerów ma ze sobą elektronikę, która w tej zamkniętej przestrzeni generuje anomalie. Gdzie teraz?</blockquote>
+
+    <blockquote>– Idziemy na rufę – zdecydował Aleksander, poprawiając kołnierz płaszcza. – Tam jest ogólna strefa siedząca, największe otwarte skupisko ludzi. Jeśli tam go nie ma, jesteśmy w głębokiej, czarnej dupie.</blockquote>
+
+    <p>Ruszyli zdecydowanym krokiem przed siebie. W tym czasie, dokładnie po przeciwnej stronie statku, wciśnięta w głęboki fotel przy panoramicznym oknie dziewczyna właśnie cicho przysypiała z głową opartą o zagłówek. Na jej kolanach leżała zamknięta książka. Podczas gdy w jednym końcu promu trwał pełen napięcia wyścig z czasem, w drugim panował absolutny, senny spokój.</p>
+
+    <p>A czas nieubłaganie uciekał. Prom parł przed siebie przez lodowaty Bałtyk, zbliżając ich z każdą sekundą do fińskiego brzegu.</p>
+
+
+
+
+
+    <div class="section-divider">***</div>
+
+
+
+  </main>
+
+</div>
+
+</body>
+</html>

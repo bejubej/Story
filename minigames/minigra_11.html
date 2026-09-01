@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KAPO - Przekaźniki Sieciowe</title>
+  <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+          background: #020a05;
+          color: #33ff33;
+          font-family: 'Courier New', monospace;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+          user-select: none;
+      }
+
+      .game-box {
+          width: min(520px, 100%);
+          background: #000200;
+          border: 3px solid #114411;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 0 35px rgba(51, 255, 51, 0.2);
+      }
+
+      .header {
+          text-align: center;
+          margin-bottom: 15px;
+          border-bottom: 1px dashed #114411;
+          padding-bottom: 12px;
+      }
+      .header h1 { font-size: 16px; letter-spacing: 2px; text-transform: uppercase; color: #55ff55; }
+
+      .instructions {
+          background: rgba(17, 68, 17, 0.15);
+          border: 1px solid #114411;
+          border-radius: 6px;
+          padding: 10px 12px;
+          font-size: 11px;
+          line-height: 1.5;
+          color: #aaffaa;
+          margin-bottom: 15px;
+      }
+
+      .grid-container {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 15px;
+      }
+
+      #networkCanvas {
+          background: #050f07;
+          border: 2px solid #114411;
+          border-radius: 8px;
+          cursor: pointer;
+          max-width: 100%;
+          height: auto;
+      }
+
+      .stats {
+          background: #031405;
+          padding: 10px;
+          border-radius: 6px;
+          border: 1px solid #114411;
+          font-size: 12px;
+          text-align: center;
+          font-weight: bold;
+      }
+
+      .overlay {
+          display: none; position: fixed; inset: 0; background: rgba(0, 2, 0, 0.97);
+          z-index: 100; justify-content: center; align-items: center; flex-direction: column;
+      }
+      .overlay.active { display: flex; }
+      .overlay h2 { font-size: 22px; margin-bottom: 20px; text-align: center; text-transform: uppercase; color: #33ff33; }
+      .btn {
+          background: #33ff33; color: #000000; border: 0; padding: 12px 28px;
+          font-family: inherit; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase;
+      }
+  </style>
+</head>
+<body>
+
+<div class="game-box">
+  <div class="header">
+    <h1>NODE_LINK // REKONEKTOR</h1>
+  </div>
+
+  <div class="instructions">
+    <strong>SIATKA POŁĄCZEŃ:</strong> Klikaj na węzły sieci, aby obracać ścieżki kabli. Połącz <span>WEJŚCIE (IN)</span> w lewym górnym rogu z <span>WYJŚCIEM (OUT)</span> w prawym dolnym rogu!
+  </div>
+
+  <div class="grid-container">
+    <canvas id="networkCanvas" width="480" height="480"></canvas>
+  </div>
+
+  <div class="stats" id="statusText" style="color: #ff5555;">BRAK SYGNAŁU (0/1)</div>
+</div>
+
+<div class="overlay" id="endOverlay">
+  <h2>SYGNAŁ PRZEKIEROWANY PRAWIDŁOWO!</h2>
+  <button class="btn" onclick="initGame()">RESTART</button>
+</div>
+
+<script>
+  const canvas = document.getElementById("networkCanvas");
+  const ctx = canvas.getContext("2d");
+  const statusText = document.getElementById("statusText");
+  const endOverlay = document.getElementById("endOverlay");
+
+  const gridSize = 6;
+  const cellSize = 80;
+
+  let grid = [];
+  let isSolved = false;
+
+  // typ 0: prosta [GÓRA, PRAWO, DÓŁ, LEWO] -> [1, 0, 1, 0]
+  // typ 1: zakręt -> [1, 1, 0, 0]
+  // typ 2: trójnik -> [1, 1, 0, 1]
+  const nodeTypes = [0, 1, 2];
+
+  function initGame() {
+    isSolved = false;
+    endOverlay.classList.remove("active");
+    statusText.textContent = "BRAK SYGNAŁU (0/1)";
+    statusText.style.color = "#ff5555";
+
+    // 1. Inicjalizacja pustej siatki
+    grid = [];
+    for (let r = 0; r < gridSize; r++) {
+      grid[r] = [];
+      for (let c = 0; c < gridSize; c++) {
+        const type = nodeTypes[Math.floor(Math.random() * nodeTypes.length)];
+        grid[r][c] = { type, rotation: 0, active: false };
+      }
+    }
+
+    // 2. Gwarancja rozwiązania: Budowanie sprawnej ścieżki od (0,0) do (5,5)
+    let currR = 0, currC = 0;
+    let path = [{r: 0, c: 0}];
+    while (currR < gridSize - 1 || currC < gridSize - 1) {
+      let canGoRight = currC < gridSize - 1;
+      let canGoDown = currR < gridSize - 1;
+
+      if (canGoRight && canGoDown) {
+        if (Math.random() < 0.5) currC++; else currR++;
+      } else if (canGoRight) {
+        currC++;
+      } else {
+        currR++;
+      }
+      path.push({r: currR, c: currC});
+    }
+
+    // Ustawienie wymuszonego typu zakrętów / prostych na ścieżce
+    for (let i = 0; i < path.length; i++) {
+      let node = path[i];
+      let prev = i > 0 ? path[i-1] : {r: 0, c: -1}; // Wejście z lewej dla (0,0)
+      let next = i < path.length - 1 ? path[i+1] : {r: gridSize-1, c: gridSize}; // Wyjście w prawo dla OUT
+
+      let inDir = prev.r < node.r ? 0 : (prev.c > node.c ? 1 : (prev.r > node.r ? 2 : 3));
+      let outDir = next.r < node.r ? 0 : (next.c > node.c ? 1 : (next.r > node.r ? 2 : 3));
+
+      let dirsNeeded = [false, false, false, false];
+      dirsNeeded[inDir] = true;
+      dirsNeeded[outDir] = true;
+
+      // Dobierz odpowiedni typ węzła
+      let count = dirsNeeded.filter(Boolean).length;
+      if (count === 2) {
+        if ((dirsNeeded[0] && dirsNeeded[2]) || (dirsNeeded[1] && dirsNeeded[3])) {
+          grid[node.r][node.c].type = 0; // Prosty
+        } else {
+          grid[node.r][node.c].type = 1; // Zakręt
+        }
+      }
+    }
+
+    // 3. Wymieszanie obrotów (Randomize rotations)
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        grid[r][c].rotation = Math.floor(Math.random() * 4);
+      }
+    }
+
+    checkConnections();
+    drawGrid();
+  }
+
+  function getDirections(node) {
+    let base = [];
+    if (node.type === 0) base = [true, false, true, false];       // Prosta pionowa
+    if (node.type === 1) base = [true, true, false, false];      // Zakręt góra-prawo
+    if (node.type === 2) base = [true, true, false, true];       // Trójnik góra-prawo-lewo
+
+    let rot = node.rotation;
+    let result = [...base];
+    for (let i = 0; i < rot; i++) {
+      let last = result.pop();
+      result.unshift(last);
+    }
+    return result;
+  }
+
+  function checkConnections() {
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        grid[r][c].active = false;
+      }
+    }
+
+    let queue = [];
+    let visited = Array.from({ length: gridSize }, () => Array(gridSize).fill(false));
+
+    let startDirs = getDirections(grid[0][0]);
+
+    // Wejście sygnału z lewej strony (index 3)
+    if (startDirs[3]) {
+      queue.push({r: 0, c: 0});
+      visited[0][0] = true;
+    }
+
+    while (queue.length > 0) {
+      let curr = queue.shift();
+      grid[curr.r][curr.c].active = true;
+      let currDirs = getDirections(grid[curr.r][curr.c]);
+
+      let rowOffsets = [-1, 0, 1, 0];
+      let colOffsets = [0, 1, 0, -1];
+
+      for (let i = 0; i < 4; i++) {
+        if (currDirs[i]) {
+          let nr = curr.r + rowOffsets[i];
+          let nc = curr.c + colOffsets[i];
+
+          if (nr >= 0 && nr < gridSize && nc >= 0 && nc < gridSize && !visited[nr][nc]) {
+            let neighborDirs = getDirections(grid[nr][nc]);
+            let oppositeDir = (i + 2) % 4;
+
+            if (neighborDirs[oppositeDir]) {
+              visited[nr][nc] = true;
+              queue.push({r: nr, c: nc});
+            }
+          }
+        }
+      }
+    }
+
+    // Warunek wygranej: Ostatni węzeł jest aktywny I jego wyjście jest połączone z punktem docelowym (np. w prawo lub dół)
+    let endDirs = getDirections(grid[gridSize-1][gridSize-1]);
+    if (grid[gridSize-1][gridSize-1].active && (endDirs[1] || endDirs[2])) {
+      isSolved = true;
+      statusText.textContent = "POŁĄCZENIE USTANOWIONE! (1/1)";
+      statusText.style.color = "#33ff33";
+      (window.opener || window.parent).postMessage({ type: "minigameComplete" }, "*");
+      setTimeout(() => { endOverlay.classList.add("active"); }, 600);
+    }
+  }
+
+  function drawNode(r, c, node) {
+    let x = c * cellSize;
+    let y = r * cellSize;
+    let cx = x + cellSize / 2;
+    let cy = y + cellSize / 2;
+
+    ctx.strokeStyle = "#113311";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, cellSize, cellSize);
+
+    if (r === 0 && c === 0) {
+      ctx.fillStyle = node.active ? "#33ff33" : "#666666";
+      ctx.font = "bold 10px monospace";
+      ctx.fillText("IN ▶", x + 4, y + 14);
+    }
+    if (r === gridSize-1 && c === gridSize-1) {
+      ctx.fillStyle = isSolved ? "#33ff33" : "#666666";
+      ctx.font = "bold 10px monospace";
+      ctx.fillText("OUT ▶", x + cellSize - 36, y + cellSize - 8);
+    }
+
+    ctx.strokeStyle = node.active ? "#33ff33" : "#225522";
+    ctx.lineWidth = node.active ? 4 : 2;
+    ctx.lineCap = "square";
+
+    let dirs = getDirections(node);
+
+    ctx.beginPath();
+    if (dirs[0]) { ctx.moveTo(cx, cy); ctx.lineTo(cx, y); }
+    if (dirs[1]) { ctx.moveTo(cx, cy); ctx.lineTo(x + cellSize, cy); }
+    if (dirs[2]) { ctx.moveTo(cx, cy); ctx.lineTo(cx, y + cellSize); }
+    if (dirs[3]) { ctx.moveTo(cx, cy); ctx.lineTo(x, cy); }
+    ctx.stroke();
+
+    ctx.fillStyle = node.active ? "#55ff55" : "#114411";
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawGrid() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        drawNode(r, c, grid[r][c]);
+      }
+    }
+  }
+
+  canvas.addEventListener("click", (e) => {
+    if (isSolved) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const mouseX = (e.clientX - rect.left) * scaleX;
+    const mouseY = (e.clientY - rect.top) * scaleY;
+
+    const c = Math.floor(mouseX / cellSize);
+    const r = Math.floor(mouseY / cellSize);
+
+    if (r >= 0 && r < gridSize && c >= 0 && c < gridSize) {
+      grid[r][c].rotation = (grid[r][c].rotation + 1) % 4;
+      checkConnections();
+      drawGrid();
+    }
+  });
+
+  initGame();
+</script>
+</body>
+</html>

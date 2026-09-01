@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kindle - Błąd Systemowy</title>
+  <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+          background: #121212;
+          color: #111;
+          font-family: 'Courier New', monospace;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+          user-select: none;
+      }
+
+      .kindle-device {
+          width: 410px;
+          background: #222222;
+          border-radius: 20px;
+          padding: 35px 20px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 5px rgba(255,255,255,0.1);
+          border: 4px solid #1a1a1a;
+      }
+
+      .eink-screen {
+          background: #cbcfc8;
+          border: 3px solid #000;
+          border-radius: 4px;
+          padding: 16px;
+          min-height: 480px;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+          overflow: hidden;
+      }
+
+      /* Efekt odświeżania E-Ink */
+      .eink-screen.flash {
+          animation: einkRefresh 0.2s linear;
+      }
+
+      @keyframes einkRefresh {
+          0% { filter: invert(0); }
+          50% { filter: invert(1); background: #000; }
+          100% { filter: invert(0); }
+      }
+
+      .top-bar {
+          display: flex;
+          justify-content: space-between;
+          font-size: 11px;
+          font-weight: bold;
+          border-bottom: 2px solid #000;
+          padding-bottom: 6px;
+          margin-bottom: 12px;
+          letter-spacing: 1px;
+      }
+
+      .alert-box {
+          background: #bbbfb8;
+          border: 2px solid #000;
+          padding: 10px;
+          text-align: center;
+          margin-bottom: 15px;
+      }
+      .alert-title { font-weight: bold; font-size: 12px; text-transform: uppercase; margin-bottom: 4px; color: #000; }
+      .alert-desc { font-size: 10px; line-height: 1.4; }
+
+      .sequence-display {
+          text-align: center;
+          font-size: 13px;
+          font-weight: bold;
+          background: #000;
+          color: #fff;
+          padding: 8px;
+          border-radius: 2px;
+          margin-bottom: 15px;
+          letter-spacing: 2px;
+          min-height: 34px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .cpu-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+          margin-top: auto;
+          margin-bottom: auto;
+      }
+
+      .node {
+          aspect-ratio: 1;
+          background: #d8dcd5;
+          border: 2px solid #000;
+          border-radius: 4px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          font-size: 22px;
+          font-weight: bold;
+          cursor: pointer;
+          position: relative;
+          box-shadow: 2px 2px 0px #000;
+          transition: transform 0.05s;
+      }
+
+      .node:active {
+          transform: translate(1px, 1px);
+          box-shadow: 1px 1px 0px #000;
+      }
+
+      .node .node-id { font-size: 22px; }
+      .node .seq-num { position: absolute; top: 4px; right: 6px; font-size: 10px; font-weight: bold; color: #333; }
+
+      /* Stan E-Ink podświetlenia */
+      .node.active-press {
+          background: #000 !important;
+          color: #fff !important;
+      }
+      .node.active-press .seq-num { color: #fff !important; }
+
+      .footer-stats {
+          border-top: 2px solid #000;
+          padding-top: 8px;
+          display: flex;
+          justify-content: space-between;
+          font-size: 11px;
+          font-weight: bold;
+      }
+
+      .overlay {
+          display: none; position: absolute; inset: 0; background: #cbcfc8;
+          z-index: 100; justify-content: center; align-items: center; flex-direction: column;
+          padding: 20px; text-align: center;
+      }
+      .overlay.active { display: flex; }
+      .overlay h2 { font-size: 20px; margin-bottom: 12px; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 4px; }
+
+      .btn {
+          background: #000;
+          color: #fff;
+          border: 0;
+          padding: 10px 20px;
+          font-family: inherit;
+          font-weight: bold;
+          font-size: 11px;
+          border-radius: 2px;
+          cursor: pointer;
+          text-transform: uppercase;
+          margin-top: 15px;
+          letter-spacing: 1px;
+      }
+      .btn:hover { background: #333; }
+  </style>
+</head>
+<body>
+
+<div class="kindle-device">
+  <div class="eink-screen" id="einkScreen">
+
+    <div class="top-bar">
+      <div>KINDLE // OS_RECOVERY</div>
+      <div>BAT: <span id="batteryText">50%</span></div>
+    </div>
+
+    <div class="alert-box">
+      <div class="alert-title">CRITICAL_OVERHEAT_WARNING</div>
+      <div class="alert-desc">Wykryto pętlę danych. Schłodź rdzenie procesora wprowadzając sekwencję!</div>
+    </div>
+
+    <div class="sequence-display" id="seqDisplay">SEKWENCJA: ---</div>
+
+    <div class="cpu-grid" id="cpuGrid"></div>
+
+    <div class="footer-stats">
+      <div>TRANSFER: <span id="transferText">0%</span></div>
+      <div>STAGE: <span id="stageText">1/2</span></div>
+    </div>
+
+    <div class="overlay" id="endOverlay">
+      <h2 id="endTitle">ZALICZONE</h2>
+      <p id="endDesc" style="font-size: 11px; margin-bottom: 15px; line-height: 1.4;"></p>
+      <div id="btnContainer"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const cpuGrid = document.getElementById("cpuGrid");
+  const batteryText = document.getElementById("batteryText");
+  const transferText = document.getElementById("transferText");
+  const stageText = document.getElementById("stageText");
+  const seqDisplay = document.getElementById("seqDisplay");
+  const endOverlay = document.getElementById("endOverlay");
+  const endTitle = document.getElementById("endTitle");
+  const endDesc = document.getElementById("endDesc");
+  const btnContainer = document.getElementById("btnContainer");
+  const einkScreen = document.getElementById("einkScreen");
+
+  let currentStage = 1;
+  let nodeCount = 6;
+  let battery = 50;
+  let transferProgress = 0;
+  let isGameOver = false;
+
+  let targetSequence = [];
+  let userSequence = [];
+  let nodesActive = [];
+
+  let gameTicker = null;
+
+  function triggerEinkFlash() {
+    einkScreen.classList.remove("flash");
+    void einkScreen.offsetWidth;
+    einkScreen.classList.add("flash");
+  }
+
+  function initGame() {
+    isGameOver = false;
+    battery = 50;
+    transferProgress = 0;
+    endOverlay.classList.remove("active");
+    btnContainer.innerHTML = "";
+
+    setupStage();
+    buildGrid();
+    generateNewSequence();
+
+    clearInterval(gameTicker);
+    gameTicker = setInterval(updateGameLoop, 200);
+  }
+
+  function advanceStage() {
+    currentStage++;
+    transferProgress = 0;
+    triggerEinkFlash();
+    setupStage();
+    buildGrid();
+    generateNewSequence();
+  }
+
+  function setupStage() {
+    stageText.textContent = `${currentStage}/2`;
+    nodeCount = currentStage === 1 ? 6 : 9;
+  }
+
+  function buildGrid() {
+    cpuGrid.innerHTML = "";
+    nodesActive = [];
+
+    for (let i = 1; i <= nodeCount; i++) {
+      const node = document.createElement("div");
+      node.classList.add("node");
+      node.dataset.id = i;
+      node.innerHTML = `<span class="node-id">${i}</span><span class="seq-num" id="seqHint-${i}"></span>`;
+      node.addEventListener("mousedown", () => handleNodeClick(i, node));
+      cpuGrid.appendChild(node);
+      nodesActive.push({ id: i, element: node });
+    }
+  }
+
+  function generateNewSequence() {
+    targetSequence = [];
+    userSequence = [];
+
+    const seqLength = currentStage === 1 ? 3 : 4;
+    for (let i = 0; i < seqLength; i++) {
+      targetSequence.push(Math.floor(Math.random() * nodeCount) + 1);
+    }
+
+    // Czyszczenie podpowiedzi kroków
+    nodesActive.forEach(n => {
+      const hint = document.getElementById(`seqHint-${n.id}`);
+      if (hint) hint.textContent = "";
+    });
+
+    seqDisplay.textContent = "KOD: " + targetSequence.join("-");
+  }
+
+  function handleNodeClick(id, element) {
+    if (isGameOver) return;
+
+    element.classList.add("active-press");
+    setTimeout(() => element.classList.remove("active-press"), 150);
+
+    userSequence.push(id);
+    const idx = userSequence.length - 1;
+
+    // Oryginalna kara: -5% baterii oraz wygenerowanie nowej sekwencji
+    if (userSequence[idx] !== targetSequence[idx]) {
+      battery -= 5;
+      triggerEinkFlash();
+      generateNewSequence();
+      return;
+    }
+
+    const hint = document.getElementById(`seqHint-${id}`);
+    if (hint) hint.textContent = userSequence.length;
+
+    // Oryginalny przyrost transferu: +15% (poziom 1) / +12% (poziom 2)
+    if (userSequence.length === targetSequence.length) {
+      transferProgress += currentStage === 1 ? 15 : 12;
+
+      if (transferProgress >= 100) {
+        transferProgress = 100;
+        if (currentStage === 2) {
+          endGame(true);
+        } else {
+          advanceStage();
+        }
+      } else {
+        generateNewSequence();
+      }
+    }
+  }
+
+  function updateGameLoop() {
+    if (isGameOver) return;
+
+    // Przywrócona oryginalna formuła drenażu baterii
+    const hotCount = nodesActive.length;
+    const drainRate = 0.03 + (hotCount * 0.023 * currentStage);
+
+    battery -= drainRate;
+
+    if (battery <= 0) {
+      battery = 0;
+      endGame(false);
+    }
+
+    batteryText.textContent = `${Math.ceil(battery)}%`;
+    transferText.textContent = `${Math.floor(transferProgress)}%`;
+  }
+
+  function endGame(success) {
+    isGameOver = true;
+    clearInterval(gameTicker);
+    triggerEinkFlash();
+    endOverlay.classList.add("active");
+    btnContainer.innerHTML = "";
+
+    if (success) {
+      endTitle.textContent = "TRANSFER ZAKOŃCZONY";
+      endDesc.textContent = "Sukces — odblokowano kolejny rozdział.";
+      (window.opener || window.parent).postMessage({ type: "minigameComplete" }, "*");
+    } else {
+      endTitle.textContent = "AWARIA ZASILANIA";
+      endDesc.textContent = "Bateria spadła do 0%. Dane zostały uszkodzone.";
+
+      const btn = document.createElement("button");
+      btn.className = "btn";
+      btn.textContent = "REBOOT DEVICE";
+      btn.onclick = () => { currentStage = 1; initGame(); };
+      btnContainer.appendChild(btn);
+    }
+  }
+
+  initGame();
+</script>
+</body>
+</html>

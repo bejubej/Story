@@ -1,0 +1,374 @@
+<!-- lapanie spadajacych -->
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KAPO - Rekonstrukcja Algorytmu</title>
+  <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+          background: #020a05;
+          color: #33ff33;
+          font-family: 'Courier New', monospace;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+          user-select: none;
+      }
+
+      .game-box {
+          width: 440px;
+          background: #000200;
+          border: 3px solid #114411;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 0 35px rgba(51, 255, 51, 0.2);
+      }
+
+      .header {
+          text-align: center;
+          margin-bottom: 15px;
+          border-bottom: 1px dashed #114411;
+          padding-bottom: 12px;
+      }
+      .header h1 { font-size: 18px; letter-spacing: 2px; text-transform: uppercase; color: #55ff55; margin-bottom: 5px; }
+
+      .instructions {
+          background: rgba(17, 68, 17, 0.15);
+          border: 1px solid #114411;
+          border-radius: 6px;
+          padding: 10px 12px;
+          font-size: 11px;
+          line-height: 1.5;
+          color: #aaffaa;
+          margin-bottom: 15px;
+      }
+      .instructions strong { color: #ff5555; }
+      .instructions span { color: #33ff33; font-weight: bold; }
+
+      .canvas-container {
+          position: relative;
+          margin-bottom: 15px;
+      }
+
+      #matrixCanvas {
+          background: #000000;
+          border: 2px solid #114411;
+          border-radius: 8px;
+          display: block;
+      }
+
+      .stats-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          background: #031405;
+          padding: 10px;
+          border-radius: 6px;
+          border: 1px solid #114411;
+          font-size: 11px;
+          margin-bottom: 10px;
+      }
+      .stat-item { display: flex; flex-direction: column; }
+      .stat-label { color: #227722; text-transform: uppercase; font-size: 9px; margin-bottom: 2px; }
+      .stat-val { font-size: 15px; font-weight: bold; }
+
+      .overlay {
+          display: none; position: fixed; inset: 0; background: rgba(0, 2, 0, 0.97);
+          z-index: 100; justify-content: center; align-items: center; flex-direction: column;
+      }
+      .overlay.active { display: flex; }
+      .overlay h2 { font-size: 24px; margin-bottom: 20px; text-align: center; text-transform: uppercase; padding: 0 20px; line-height: 1.4; }
+      .btn {
+          background: #33ff33; color: #000000; border: 0; padding: 12px 28px;
+          font-family: inherit; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase;
+          box-shadow: 0 0 15px rgba(51, 255, 51, 0.4);
+      }
+  </style>
+</head>
+<body>
+
+<div class="game-box">
+  <div class="header">
+    <h1>PÕHJATÄHT // DEFRAGMENTER</h1>
+  </div>
+
+  <div class="instructions">
+    <strong>PRZECHWYTYWANIE:</strong> Steruj filtrem za pomocą <span>A / D</span> lub <span>STRZAŁEK</span>. Pakiety mają różne prędkości! Przepuszczenie pakietu to aż <strong>+60% bufora</strong> (max 1 błąd!).
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="matrixCanvas" width="400" height="300"></canvas>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-label">Pakiety zebrane</div>
+      <div class="stat-val" id="scoreText" style="color: #33ff33;">0 / 15</div>
+    </div>
+    <div class="stat-item" style="text-align: right;">
+      <div class="stat-label">Przepełnienie bufora</div>
+      <div class="stat-val" id="bufferText" style="color: #ff5555;">0%</div>
+    </div>
+  </div>
+
+  <div style="font-size: 10px; color: #227722; text-align: center;">ETAP: <span id="stageText" style="color:#fff;">1/2</span></div>
+</div>
+
+<div class="overlay" id="endOverlay">
+  <h2 id="endTitle">ZALICZONE!</h2>
+  <button class="btn" onclick="restartGame()">RESTART</button>
+</div>
+
+<script>
+  const canvas = document.getElementById("matrixCanvas");
+  const ctx = canvas.getContext("2d");
+  const scoreText = document.getElementById("scoreText");
+  const bufferText = document.getElementById("bufferText");
+  const stageText = document.getElementById("stageText");
+  const endOverlay = document.getElementById("endOverlay");
+  const endTitle = document.getElementById("endTitle");
+
+  let currentStage = 1;
+  let isGameOver = false;
+
+  let score = 0;
+  let targetScore = 15;
+  let bufferError = 0;
+
+  // Konfiguracja tła (deszcz Matrixa)
+  let columns = [];
+  const fontSize = 14;
+  const totalColumns = Math.floor(canvas.width / 20);
+  const hexChars = "0123456789ABCDEF&*#@%";
+
+  // Konfiguracja platformy gracza (zwiększona prędkość ruchu dla balansu)
+  const paddle = {
+    width: 75,
+    height: 6,
+    x: (canvas.width - 75) / 2,
+    y: canvas.height - 15,
+    speed: 8
+  };
+
+  // Stan naciśniętych klawiszy
+  const keys = {
+    left: false,
+    right: false
+  };
+
+  // Tablica aktywnych anomalii do złapania i parametry spawnu
+  let anomalies = [];
+  let anomalySpawnInterval = 65;
+  let spawnTimer = 0;
+  let baseScrollSpeed = 2.4;
+
+  // Obsługa klawiatury
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.left = true;
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.right = true;
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.left = false;
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.right = false;
+  });
+
+  function initGame() {
+    isGameOver = false;
+    score = 0;
+    bufferError = 0;
+    anomalies = [];
+    spawnTimer = 0;
+    paddle.x = (canvas.width - paddle.width) / 2;
+    endOverlay.classList.remove("active");
+
+    setupStage();
+    setupMatrixColumns();
+
+    if (!window.animationRequested) {
+      window.animationRequested = true;
+      requestAnimationFrame(gameLoop);
+    }
+  }
+
+  function setupStage() {
+    stageText.textContent = `${currentStage}/2`;
+    if (currentStage === 1) {
+      targetScore = 15;
+      anomalySpawnInterval = 65;
+      baseScrollSpeed = 2.5;
+      paddle.width = 75;
+    } else {
+      targetScore = 20;
+      anomalySpawnInterval = 35; // Etap 2: zasyp pakietów!
+      baseScrollSpeed = 3.8;
+      paddle.width = 60;
+    }
+    scoreText.textContent = `${score} / ${targetScore}`;
+    bufferText.textContent = `${bufferError}%`;
+  }
+
+  function setupMatrixColumns() {
+    columns = [];
+    for (let i = 0; i < totalColumns; i++) {
+      columns.push({
+        x: i * 20 + 5,
+        y: Math.random() * -canvas.height,
+        chars: Array.from({length: 10}, () => hexChars[Math.floor(Math.random() * hexChars.length)])
+      });
+    }
+  }
+
+  function updatePaddle() {
+    if (keys.left && paddle.x > 0) {
+      paddle.x -= paddle.speed;
+    }
+    if (keys.right && paddle.x < canvas.width - paddle.width) {
+      paddle.x += paddle.speed;
+    }
+  }
+
+  function updateAndDrawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.font = `${fontSize}px monospace`;
+
+    columns.forEach(col => {
+      if (Math.random() < 0.1) {
+        col.chars[Math.floor(Math.random() * col.chars.length)] = hexChars[Math.floor(Math.random() * hexChars.length)];
+      }
+
+      col.chars.forEach((char, idx) => {
+        ctx.fillStyle = `rgba(51, 255, 51, ${0.08 + (idx / col.chars.length) * 0.4})`;
+        ctx.fillText(char, col.x, col.y + (idx * fontSize));
+      });
+
+      col.y += baseScrollSpeed * 0.6;
+
+      if (col.y > canvas.height) {
+        col.y = -140;
+      }
+    });
+  }
+
+  function handleAnomalySpawning() {
+    spawnTimer++;
+    if (spawnTimer >= anomalySpawnInterval) {
+      spawnTimer = 0;
+
+      const randomX = Math.floor(Math.random() * (canvas.width - 60)) + 5;
+      const randomHex = Array.from({length: 4}, () => hexChars[Math.floor(Math.random() * 16)]).join("");
+
+      // Każdy pakiet dostaje indywidualną prędkość (baza + losowy bonus od 0.2 do 2.0)
+      const individualSpeed = baseScrollSpeed + (Math.random() * 1.8 + 0.2);
+
+      anomalies.push({
+        x: randomX,
+        y: -20,
+        text: `[${randomHex}]`,
+        w: 48,
+        h: 16,
+        speed: individualSpeed
+      });
+    }
+  }
+
+  function updateAndDrawAnomalies() {
+    for (let i = anomalies.length - 1; i >= 0; i--) {
+      const a = anomalies[i];
+      a.y += a.speed; // Ruch z unikalną prędkością pakietu
+
+      // RYSOWANIE PAKIETU ANOMALII
+      ctx.fillStyle = "#ff3333";
+      ctx.fillRect(a.x - 2, a.y - 12, a.w, a.h);
+
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(a.x, a.y - 10, a.w - 4, a.h - 4);
+
+      ctx.fillStyle = "#ff9999";
+      ctx.font = `bold 12px monospace`;
+      ctx.fillText(a.text, a.x + 3, a.y + 1);
+
+      // DETEKCJA KOLIZJI Z PLATFORMĄ (ŁAPANIE)
+      if (a.y >= paddle.y - 5 && a.y <= paddle.y + paddle.height + 5) {
+        if (a.x + a.w >= paddle.x && a.x <= paddle.x + paddle.width) {
+          anomalies.splice(i, 1);
+          score++;
+          scoreText.textContent = `${score} / ${targetScore}`;
+
+          if (score >= targetScore) {
+            if (currentStage === 2) {
+              endGame(true);
+            } else {
+              currentStage++;
+              initGame();
+            }
+          }
+          continue;
+        }
+      }
+
+      // PRZEPUSZCZENIE PAKIETU - TERAZ KARA WYNOSI 60%
+      if (a.y > canvas.height + 15) {
+        anomalies.splice(i, 1);
+        bufferError += 60; // Stała kara 60% bez względu na etap
+        if (bufferError > 100) bufferError = 100;
+        bufferText.textContent = `${bufferError}%`;
+
+        if (bufferError >= 100) {
+          endGame(false);
+        }
+      }
+    }
+  }
+
+  function drawPaddle() {
+    ctx.fillStyle = "#33ff33";
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(paddle.x + 2, paddle.y + 1, paddle.width - 4, 2);
+  }
+
+  function gameLoop() {
+    if (isGameOver) {
+      window.animationRequested = false;
+      return;
+    }
+
+    updatePaddle();
+    updateAndDrawMatrix();
+    handleAnomalySpawning();
+    drawPaddle();
+    updateAndDrawAnomalies();
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  function endGame(success) {
+    isGameOver = true;
+    endOverlay.classList.add("active");
+    if (success) {
+      endTitle.textContent = "ALGORYTM PÕHJATÄHT ZREKONSTRUOWANY!";
+      endTitle.style.color = "#33ff33";
+      (window.opener || window.parent).postMessage({ type: "minigameComplete" }, "*");
+    } else {
+      endTitle.textContent = "PRZEPEŁNIENIE BUFORA. UTRATA SYGNAŁU!";
+      endTitle.style.color = "#ff3333";
+    }
+  }
+
+  function restartGame() {
+    currentStage = 1;
+    initGame();
+  }
+
+  initGame();
+</script>
+</body>
+</html>
