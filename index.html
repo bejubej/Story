@@ -1,12 +1,1897 @@
-<!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moja strona</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tablica Śledztwa — Operacja Północna Gwiazda</title>
+  <style>
+      :root {
+          --bg:      #0a0a0f;
+          --accent:  #4a9eff;
+          --yellow:  #d4af37;
+          --text:    #e0e8f0;
+          --border:  #1e2a3a;
+          --card:    #0f1520;
+          --red:     #c00;
+      }
+
+      * { margin:0; padding:0; box-sizing:border-box; }
+
+      html, body { overflow-x: hidden; }
+
+      body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'Segoe UI', monospace;
+          padding: 24px 20px 40px;
+          min-height: 100vh;
+      }
+
+      /* ===== HEADER ===== */
+      header {
+          text-align: center;
+          margin-bottom: 32px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid var(--border);
+      }
+      .case-ref {
+          font-size: 10px;
+          color: var(--accent);
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          opacity: 0.6;
+          margin-bottom: 10px;
+      }
+      h1 {
+          font-size: 22px;
+          letter-spacing: 3px;
+          color: #fff;
+          text-transform: uppercase;
+          margin-bottom: 4px;
+      }
+      .subtitle {
+          font-size: 11px;
+          color: #334;
+          letter-spacing: 1px;
+      }
+
+      /* ===== STATS ===== */
+      .stats {
+          display: flex;
+          justify-content: center;
+          gap: 32px;
+          margin-bottom: 28px;
+      }
+      .stat { text-align: center; }
+      .stat-value {
+          font-size: 26px;
+          color: var(--yellow);
+          font-weight: 700;
+          font-family: 'Courier New', monospace;
+      }
+      .stat-label {
+          font-size: 10px;
+          color: #446;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-top: 3px;
+      }
+
+      /* ===== GRID ===== */
+      .board {
+          max-width: 900px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+      }
+
+      /* ===== ROW ===== */
+      .board-row {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 10px;
+          align-items: stretch;
+      }
+
+      /* ===== ZAGADKA CARD ===== */
+      .puzzle-card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 16px 20px;
+          transition: all 0.2s;
+      }
+      .puzzle-card.unlocked {
+          border-color: rgba(74,158,255,0.3);
+      }
+      .puzzle-card.unlocked:hover {
+          border-color: var(--accent);
+          box-shadow: 0 0 16px rgba(74,158,255,0.1);
+      }
+      .puzzle-card.solved {
+          background: #0a1a10;
+          border-color: rgba(74,255,140,0.25);
+      }
+      .puzzle-card.locked {
+          opacity: 0.3;
+          pointer-events: none;
+      }
+
+      .puzzle-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+      }
+      .puzzle-ref {
+          font-size: 9px;
+          color: var(--accent);
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          opacity: 0.6;
+      }
+      .puzzle-status { font-size: 14px; }
+
+      .puzzle-title {
+          font-size: 13px;
+          font-weight: 600;
+          color: #fff;
+          margin-bottom: 6px;
+      }
+      .puzzle-hint {
+          font-size: 11px;
+          color: #5a7a9a;
+          line-height: 1.6;
+          font-style: italic;
+      }
+      .puzzle-input-group {
+          margin-top: 14px;
+          display: flex;
+          gap: 8px;
+      }
+      .puzzle-input {
+          flex: 1;
+          padding: 8px 12px;
+          background: rgba(0,0,0,0.4);
+          border: 1px solid var(--border);
+          border-radius: 5px;
+          color: var(--text);
+          font-family: 'Courier New', monospace;
+          font-size: 12px;
+          outline: none;
+          transition: border-color 0.2s;
+      }
+      .puzzle-input:focus { border-color: var(--accent); }
+      .solve-btn {
+          padding: 8px 16px;
+          background: var(--accent);
+          color: #000;
+          border: none;
+          border-radius: 5px;
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.15s;
+      }
+      .solve-btn:hover { background: #6ab8ff; }
+      .puzzle-solved-msg {
+          margin-top: 12px;
+          padding: 8px 12px;
+          background: rgba(74,255,140,0.08);
+          border: 1px solid rgba(74,255,140,0.2);
+          border-radius: 5px;
+          color: #4aff8c;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 1px;
+      }
+      .locked-hint {
+          margin-top: 10px;
+          font-size: 10px;
+          color: #2a3a4a;
+          font-style: italic;
+      }
+
+      /* ===== CHAPTER CARD ===== */
+      .chapter-card {
+          width: 180px;
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 14px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          text-align: center;
+          transition: all 0.2s;
+          flex-shrink: 0;
+      }
+      .chapter-card.locked-chapter {
+          opacity: 0.25;
+          pointer-events: none;
+      }
+      .chapter-card.unlocked-chapter {
+          border-color: rgba(212,175,55,0.4);
+          cursor: pointer;
+          background: #0f1a10;
+      }
+      .chapter-card.unlocked-chapter:hover {
+          border-color: var(--yellow);
+          box-shadow: 0 0 16px rgba(212,175,55,0.15);
+          transform: translateY(-1px);
+      }
+      .chapter-icon {
+          font-size: 22px;
+          opacity: 0.5;
+      }
+      .chapter-card.unlocked-chapter .chapter-icon {
+          opacity: 1;
+      }
+      .chapter-num {
+          font-size: 9px;
+          color: var(--yellow);
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          opacity: 0.5;
+      }
+      .chapter-card.unlocked-chapter .chapter-num {
+          opacity: 1;
+      }
+      .chapter-label {
+          font-size: 11px;
+          color: #446;
+          line-height: 1.3;
+      }
+      .chapter-card.unlocked-chapter .chapter-label {
+          color: #8a9aaa;
+      }
+      .chapter-read-btn {
+          margin-top: 4px;
+          padding: 5px 12px;
+          background: var(--yellow);
+          color: #000;
+          border: none;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: 700;
+          cursor: pointer;
+          letter-spacing: 0.5px;
+          transition: all 0.15s;
+          display: none;
+      }
+      .chapter-card.unlocked-chapter .chapter-read-btn {
+          display: block;
+      }
+      .chapter-read-btn:hover { background: #f0d060; }
+
+      /* ===== SHAKE ===== */
+      .shake { animation: shake 0.4s ease; }
+      @keyframes shake {
+          0%,100%{transform:translateX(0)}
+          20%,60%{transform:translateX(-6px)}
+          40%,80%{transform:translateX(6px)}
+      }
+
+      /* ===== FINISH ===== */
+      .finish-section {
+          text-align: center;
+          margin: 40px 0 20px;
+      }
+      .finish-btn {
+          padding: 16px 52px;
+          background: linear-gradient(135deg,#1a4a8a,#0a2a5a);
+          color: #fff;
+          border: 1px solid var(--accent);
+          border-radius: 6px;
+          font-size: 13px;
+          font-family: 'Courier New', monospace;
+          cursor: pointer;
+          text-transform: uppercase;
+          letter-spacing: 3px;
+          transition: all 0.3s;
+          animation: finPulse 3s infinite;
+      }
+      @keyframes finPulse {
+          0%,100%{box-shadow:0 0 20px rgba(74,158,255,0.2)}
+          50%    {box-shadow:0 0 40px rgba(74,158,255,0.5)}
+      }
+      .finish-btn:hover { background:linear-gradient(135deg,#2a5aaa,#1a3a7a); }
+
+      /* ===== CHAPTER MODAL ===== */
+      .chapter-modal {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.92);
+          z-index: 1000;
+          overflow-y: auto;
+          padding: 40px 20px;
+      }
+      .chapter-modal.active { display: flex; justify-content: center; align-items: flex-start; }
+
+      .chapter-modal-inner {
+          background: #0d1520;
+          border: 1px solid rgba(212,175,55,0.2);
+          border-radius: 10px;
+          max-width: 740px;
+          width: 100%;
+          padding: 32px;
+          position: relative;
+          box-shadow: 0 0 60px rgba(212,175,55,0.08);
+          animation: modalIn 0.4s ease;
+      }
+      .chapter-frame {
+          display: block;
+          width: 100%;
+          height: 320px;
+          border: none;
+          border-radius: 8px;
+          background: transparent;
+          transition: height 0.25s ease;
+      }
+      @keyframes modalIn {
+          from{opacity:0;transform:translateY(12px)}
+          to  {opacity:1;transform:translateY(0)}
+      }
+
+      .chapter-close {
+          position: absolute;
+          top: 14px;
+          right: 18px;
+          background: transparent;
+          border: none;
+          color: #446;
+          font-size: 20px;
+          cursor: pointer;
+          transition: color 0.15s;
+          line-height: 1;
+      }
+      .chapter-close:hover { color: #fff; }
+
+      /* ===== PRZYCISK URUCHAMIANIA MINIGRY ===== */
+      .launch-btn {
+          width: 100%;
+          text-align: center;
+      }
+
+      /* STYL TREŚCI ROZDZIAŁU */
+      .chapter-wrap {
+          font-family: Georgia, 'Times New Roman', serif;
+      }
+      .chapter-number {
+          font-size: 10px;
+          color: var(--yellow);
+          letter-spacing: 3px;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+          opacity: 0.7;
+      }
+      .chapter-title {
+          font-size: 20px;
+          color: #fff;
+          font-weight: 400;
+          margin-bottom: 28px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid rgba(212,175,55,0.15);
+          font-style: italic;
+      }
+      .chapter-body {
+          font-size: 14px;
+          color: #c0ccd8;
+          line-height: 1.95;
+      }
+      .chapter-body p {
+          margin-bottom: 18px;
+          text-align: justify;
+      }
+      .chapter-body p:first-child::first-letter {
+          font-size: 48px;
+          float: left;
+          line-height: 0.8;
+          margin: 6px 8px 0 0;
+          color: var(--yellow);
+          font-family: Georgia, serif;
+      }
+      .chapter-body em { color: #8aaecc; font-style: italic; }
+      .chapter-body strong { color: #e0e8f0; font-weight: 600; }
+      .chapter-body img,
+      .chapter-body video,
+      .chapter-body table,
+      .chapter-body pre {
+          max-width: 100%;
+          height: auto;
+      }
+
+      .chapter-end-marker {
+          text-align: center;
+          margin-top: 32px;
+          padding-top: 20px;
+          border-top: 1px solid rgba(212,175,55,0.1);
+          color: #446;
+          font-size: 12px;
+          letter-spacing: 3px;
+      }
+
+      /* ===== INTRO / TRAILER OVERLAY ===== */
+      .intro-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: #000;
+          z-index: 2000;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 40px 24px;
+          text-align: center;
+      }
+      .intro-overlay.active { display: flex; }
+
+      .intro-content {
+          max-width: 560px;
+      }
+      .intro-tag {
+          font-size: 10px;
+          letter-spacing: 5px;
+          text-transform: uppercase;
+          color: #fff;
+          opacity: 0;
+          margin-bottom: 22px;
+          animation: introFadeUp 0.8s ease forwards;
+          animation-delay: 0.2s;
+      }
+      .intro-title {
+          font-size: 26px;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          color: #fff;
+          font-weight: 700;
+          margin-bottom: 36px;
+          opacity: 0;
+          animation: introFadeUp 0.9s ease forwards;
+          animation-delay: 0.6s;
+      }
+      .intro-line {
+          font-size: 14px;
+          line-height: 1.9;
+          color: #fff;
+          opacity: 0;
+          margin-bottom: 14px;
+          animation: introFadeUp 0.9s ease forwards;
+      }
+      .intro-line:nth-of-type(1) { animation-delay: 1.2s; }
+      .intro-line:nth-of-type(2) { animation-delay: 2.0s; }
+      .intro-line:nth-of-type(3) { animation-delay: 2.8s; }
+      .intro-line:nth-of-type(4) { animation-delay: 3.6s; }
+      .intro-line:nth-of-type(5) { animation-delay: 4.4s; }
+
+      @keyframes introFadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .intro-btn {
+          margin-top: 38px;
+          padding: 14px 38px;
+          background: transparent;
+          color: #fff;
+          border: 1px solid #fff;
+          border-radius: 4px;
+          font-family: inherit;
+          font-size: 12px;
+          letter-spacing: 3px;
+          text-transform: uppercase;
+          cursor: pointer;
+          opacity: 0;
+          animation: introFadeUp 0.9s ease forwards;
+          animation-delay: 5.2s;
+          transition: background 0.2s, color 0.2s;
+      }
+      .intro-btn:hover { background: #fff; color: #000; }
+
+      /* ===== RESPONSIVE ===== */
+      @media(max-width:600px){
+          .board-row { grid-template-columns: 1fr; }
+          .chapter-card { width: 100%; flex-direction: row; }
+          .chapter-modal-inner { padding: 24px 20px; }
+          .intro-title { font-size: 20px; letter-spacing: 2px; }
+          .intro-line { font-size: 13px; }
+      }
+  </style>
 </head>
 <body>
-    <h1>Witaj na mojej stronie!</h1>
-    <p>Hostowane na Vercel.</p>
+
+<!-- INTRO / TRAILER -->
+<div class="intro-overlay" id="introOverlay">
+  <div class="intro-content">
+    <div class="intro-tag">KAPO · ref. PG-2026 · dostęp zastrzeżony</div>
+    <div class="intro-title">Operacja Północna Gwiazda</div>
+    <p class="intro-line">Tallinn. Prom MEGASTAR.</p>
+    <p class="intro-line">Zwykły wyjazd obraca się w coś czego nikt nie mógł się spodziewać</p>
+    <p class="intro-line">Na promie jest sekret, za który ludzie gotowi są wiele poświęcić</p>
+    <p class="intro-line">Każde wyzwanie to osobna minigra. </p>
+    <p class="intro-line">Każda ukończona minigra odsłania kolejny rozdział tej historii. Powodzenia</p>
+    <button class="intro-btn" id="introBtn" onclick="closeIntro()">Rozumiem</button>
+  </div>
+</div>
+
+<header>
+  <div class="case-ref">KAPO / ref. PG-2026 · dostęp zastrzeżony</div>
+  <h1>Tablica Śledztwa</h1>
+  <div class="subtitle">Operacja Północna Gwiazda</div>
+</header>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-value" id="solvedCount">0</div>
+    <div class="stat-label">Rozwiązane</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="totalCount">15</div>
+    <div class="stat-label">Łącznie</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="progressPct">0%</div>
+    <div class="stat-label">Postęp</div>
+  </div>
+</div>
+
+<div class="board" id="board"></div>
+
+<div class="finish-section" id="finishSection" style="display:none;">
+  <button class="finish-btn" onclick="openFinale()">⚡ ZAMKNIJ ŚLEDZTWO ⚡</button>
+</div>
+
+<!-- MODAL ROZDZIAŁU -->
+<div class="chapter-modal" id="chapterModal">
+  <div class="chapter-modal-inner">
+    <button class="chapter-close" onclick="closeChapter()">✕</button>
+    <div id="chapterContent"></div>
+  </div>
+</div>
+
+<script>
+  /* =========================
+     MINIGRY
+     Ukończenie minigry (przycisk/zdarzenie w jej
+     wnętrzu wysyłające postMessage) odblokowuje rozdział.
+     Podmieniaj src na swoje pliki HTML.
+  ========================= */
+  const MINIGAMES = [
+    {
+      id: 1,
+      title: "Wspomnienie",
+      desc: "Przesuwaj suwakami aby wyostrzyć obraz",
+      src: "assets/minigames/minigra_9.html",
+      chapter: 1
+    },
+    {
+      id: 2,
+      title: "Lockpick",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_1.html",
+      chapter: 2
+    },
+    {
+      id: 3,
+      title: "WC",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_5.html",
+      chapter: 3
+    },
+    {
+      id: 4,
+      title: "Kindle",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_4.html",
+      chapter: 4
+    },
+    {
+      id: 5,
+      title: "Fala",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_10.html",
+      chapter: 5
+    },
+    {
+      id: 6,
+      title: "Nodelink",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_11.html",
+      chapter: 6
+    },
+    {
+      id: 7,
+      title: "Skaner",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_6.html",
+      chapter: 7
+    },
+    {
+      id: 8,
+      title: "Poszukiwanie",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_3.html",
+      chapter: 8
+    },
+    {
+      id: 9,
+      title: "Zbijak",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_15.html",
+      chapter: 9
+    },
+    {
+      id: 10,
+      title: "Snake",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_14.html",
+      chapter: 10
+    },
+    {
+      id: 11,
+      title: "Catch",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_13.html",
+      chapter: 11
+    },
+    {
+      id: 12,
+      title: "Draw and count",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_2.html",
+      chapter: 12
+    },
+    {
+      id: 13,
+      title: "Ucieknij",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_7.html",
+      chapter: 13
+    },
+    {
+      id: 14,
+      title: "Balance",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_12.html",
+      chapter: 14
+    },
+    {
+      id: 15,
+      title: "Pisz",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_8.html",
+      chapter: 15
+    }
+  ];
+
+  /* =========================
+     ROZDZIAŁY — placeholder
+     Podmieniaj src na swoje pliki HTML
+  ========================= */
+  const CHAPTERS = [
+    { num: 1,  label: "",        src: "assets/articles/rozdzial_1.html" },
+    { num: 2,  label: "",    src: "assets/articles/rozdzial_2.html" },
+    { num: 3,  label: "",         src: "assets/articles/rozdzial_3.html" },
+    { num: 4,  label: "",         src: "assets/articles/rozdzial_4.html" },
+    { num: 5,  label: "",   src: "assets/articles/rozdzial_5.html" },
+    { num: 6,  label: "",   src: "assets/articles/rozdzial_6.html" },
+    { num: 7,  label: "",      src: "assets/articles/rozdzial_7.html" },
+    { num: 8,  label: "",      src: "assets/articles/rozdzial_8.html" },
+    { num: 9,  label: "",      src: "assets/articles/rozdzial_9.html" },
+    { num: 10, label: "",     src: "assets/articles/rozdzial_10.html" },
+    { num: 11, label: "",     src: "assets/articles/rozdzial_11.html" },
+    { num: 12, label: "",     src: "assets/articles/rozdzial_12.html" },
+    { num: 13, label: "",     src: "assets/articles/rozdzial_13.html" },
+    { num: 14, label: "",     src: "assets/articles/rozdzial_14.html" },
+    { num: 15, label: "",     src: "assets/articles/rozdzial_15.html" }
+  ];
+
+  /* =========================
+     STATE
+  ========================= */
+  let gameState = JSON.parse(localStorage.getItem("megastarGame")) || { solved: {} };
+
+  /* =========================
+     RENDER
+  ========================= */
+  function render() {
+    const board = document.getElementById("board");
+    board.innerHTML = "";
+
+    let solvedCount = 0;
+    const total = MINIGAMES.length;
+
+    MINIGAMES.forEach((game, idx) => {
+      const isSolved   = !!gameState.solved[game.id];
+      const isUnlocked = game.id === 1 || !!gameState.solved[game.id - 1];
+      const chapter    = CHAPTERS[idx];
+      const chapUnlocked = isSolved;
+
+      if (isSolved) solvedCount++;
+
+      const row = document.createElement("div");
+      row.className = "board-row";
+
+      // --- MINIGRA ---
+      const card = document.createElement("div");
+      card.className = `puzzle-card ${isSolved ? "solved" : isUnlocked ? "unlocked" : "locked"}`;
+
+      const statusIcon = isSolved ? "✓" : isUnlocked ? "◈" : "🔒";
+
+      if (isUnlocked) {
+        card.innerHTML = `
+        <div class="puzzle-header">
+          <div class="puzzle-ref">WYZWANIE #${game.id}</div>
+          <div class="puzzle-status">${statusIcon}</div>
+        </div>
+        <div class="puzzle-title">${game.title}</div>
+        <div class="puzzle-hint">${game.desc}</div>
+        ${!isSolved ? `
+          <div class="puzzle-input-group">
+            <button class="solve-btn launch-btn" onclick="openMinigame(${idx})">▶ Uruchom minigrę</button>
+          </div>
+        ` : `
+          <div class="puzzle-solved-msg">✓ MINIGRA UKOŃCZONA</div>
+        `}
+      `;
+      } else {
+        card.innerHTML = `
+        <div class="puzzle-header">
+          <div class="puzzle-ref" style="opacity:.2">WYZWANIE #${game.id}</div>
+          <div class="puzzle-status">🔒</div>
+        </div>
+        <div class="puzzle-title" style="filter:blur(4px);opacity:.2">— utajnione —</div>
+        <div class="locked-hint">Ukończ minigrę #${game.id - 1} aby odblokować.</div>
+      `;
+      }
+
+      // --- ROZDZIAŁ ---
+      const chap = document.createElement("div");
+      chap.className = `chapter-card ${chapUnlocked ? "unlocked-chapter" : "locked-chapter"}`;
+      chap.innerHTML = `
+      <div class="chapter-icon">📖</div>
+      <div class="chapter-num">Rozdział ${chapter.num}</div>
+      <div class="chapter-label">${chapter.label}</div>
+      <button class="chapter-read-btn" onclick="openChapter(${idx})">Czytaj</button>
+    `;
+
+      row.appendChild(card);
+      row.appendChild(chap);
+      board.appendChild(row);
+    });
+
+    // Stats
+    document.getElementById("solvedCount").textContent = solvedCount;
+    document.getElementById("totalCount").textContent  = total;
+    document.getElementById("progressPct").textContent =
+      Math.round(solvedCount / total * 100) + "%";
+
+    if (solvedCount === total) {
+      document.getElementById("finishSection").style.display = "block";
+    }
+  }
+
+  /* =========================
+     MINIGRA — uruchamianie w osobnym oknie
+  ========================= */
+  let currentMinigameIdx = null;
+  let minigameWindowRef  = null;
+
+  function openMinigame(idx) {
+    currentMinigameIdx = idx;
+    const game = MINIGAMES[idx];
+    const url  = `${game.src}?v=${Date.now()}`;
+
+    const w = 800, h = 800;
+    // Jawna pozycja popupu (przesunięty względem głównego okna),
+    // żeby przeglądarka nie próbowała "zmieścić" obu okien obok
+    // siebie kosztem zmniejszenia głównego okna.
+    const left = (window.screenX || window.screenLeft || 0) + 60;
+    const top  = (window.screenY || window.screenTop  || 0) + 60;
+
+    const features = `width=${w},height=${h},left=${left},top=${top},` +
+      "resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no";
+
+    // Ta sama nazwa okna => kolejne kliknięcia podmieniają zawartość
+    // istniejącego okna zamiast mnożyć popupy.
+    minigameWindowRef = window.open(url, "minigameWindow", features);
+
+    if (!minigameWindowRef) {
+      alert(
+        "Przeglądarka zablokowała okienko minigry.\n" +
+        "Zezwól na wyskakujące okienka dla tej strony i kliknij ponownie."
+      );
+      return;
+    }
+    minigameWindowRef.focus();
+  }
+
+  function completeMinigame(id) {
+    gameState.solved[id] = true;
+    localStorage.setItem("megastarGame", JSON.stringify(gameState));
+    if (minigameWindowRef && !minigameWindowRef.closed) {
+      minigameWindowRef.close();
+    }
+    currentMinigameIdx = null;
+    render();
+  }
+
+  // Minigra (osobne okno) zgłasza wygraną przez:
+  // window.opener.postMessage({type:'minigameComplete'}, '*')
+  window.addEventListener("message", e => {
+    if (e.data && e.data.type === "minigameComplete" && currentMinigameIdx !== null) {
+      completeMinigame(MINIGAMES[currentMinigameIdx].id);
+    }
+  });
+
+  /* =========================
+     ROZDZIAŁ MODAL
+  ========================= */
+  async function openChapter(idx) {
+    const chapter = CHAPTERS[idx];
+    const modal   = document.getElementById("chapterModal");
+    const content = document.getElementById("chapterContent");
+
+    content.innerHTML = `
+    <div style="text-align:center;padding:40px;color:#446;font-size:13px;">
+      Ładowanie rozdziału...
+    </div>
+  `;
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+
+    try {
+      const res  = await fetch(chapter.src + "?v=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) throw new Error("not found");
+      const html = await res.text();
+
+      // Rozdział renderujemy w iframe — nie wstrzykujemy go bezpośrednio
+      // do strony przez innerHTML. Dzięki temu, jeśli plik rozdziału ma
+      // własny <style> (np. body { display:flex; ... }), te reguły
+      // zostają w 100% odizolowane i nigdy nie "wyciekną" do tablicy,
+      // niezależnie jak rozdział jest napisany.
+      content.innerHTML = "";
+      const iframe = document.createElement("iframe");
+      iframe.className = "chapter-frame";
+      iframe.srcdoc = html;
+      content.appendChild(iframe);
+
+      iframe.addEventListener("load", () => {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow.document;
+          const h = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+          const maxH = Math.round(window.innerHeight * 0.8);
+          iframe.style.height = Math.min(h + 4, maxH) + "px";
+        } catch (err) {
+          // zostaje wysokość domyślna z CSS
+        }
+      });
+    } catch {
+      content.innerHTML = `
+      <div class="chapter-wrap">
+        <div class="chapter-number">Rozdział ${chapter.num}</div>
+        <div class="chapter-title">${chapter.label}</div>
+        <div class="chapter-body">
+          <p style="color:#446;font-style:italic;text-align:center;padding:40px 0;">
+            Ten rozdział nie został jeszcze dodany.<br>
+            <span style="font-size:11px;opacity:0.5;">
+              Umieść plik w: assets/articles/rozdzial_${chapter.num}.html
+            </span>
+          </p>
+        </div>
+      </div>
+    `;
+    }
+  }
+
+  function closeChapter() {
+    document.getElementById("chapterModal").classList.remove("active");
+    document.body.style.overflow = "";
+    window.scrollTo({ left: 0 }); // zabezpieczenie przed przesunięciem strony w bok
+  }
+
+  // Zamknij klikając tło
+  document.getElementById("chapterModal").addEventListener("click", e => {
+    if (e.target === document.getElementById("chapterModal")) closeChapter();
+  });
+
+  // ESC
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeChapter();
+    if (e.ctrlKey && e.shiftKey && e.key === "R") {
+      if (confirm("Zresetować tablicę?")) {
+        localStorage.removeItem("megastarGame");
+        localStorage.removeItem("megastarIntroSeen");
+        location.reload();
+      }
+    }
+  });
+
+  /* =========================
+     FINALE
+  ========================= */
+  function openFinale() {
+    alert(
+      "OPERACJA PÓŁNOCNA GWIAZDA\n\n" +
+      "Gratulacje! To koniec...ale czy aby na pewno?\n\n\n\n" +
+      "Reset gry: CTRL+SHIFT+R"
+
+    );
+  }
+
+  /* =========================
+     INTRO / TRAILER
+  ========================= */
+  function showIntro() {
+    document.getElementById("introOverlay").classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeIntro() {
+    localStorage.setItem("megastarIntroSeen", "true");
+    document.getElementById("introOverlay").classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  /* =========================
+     START
+  ========================= */
+  render();
+  if (!localStorage.getItem("megastarIntroSeen")) {
+    showIntro();
+  }
+
+</script>
+</body>
+</html><html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tablica Śledztwa — Operacja Północna Gwiazda</title>
+  <style>
+      :root {
+          --bg:      #0a0a0f;
+          --accent:  #4a9eff;
+          --yellow:  #d4af37;
+          --text:    #e0e8f0;
+          --border:  #1e2a3a;
+          --card:    #0f1520;
+          --red:     #c00;
+      }
+
+      * { margin:0; padding:0; box-sizing:border-box; }
+
+      html, body { overflow-x: hidden; }
+
+      body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'Segoe UI', monospace;
+          padding: 24px 20px 40px;
+          min-height: 100vh;
+      }
+
+      /* ===== HEADER ===== */
+      header {
+          text-align: center;
+          margin-bottom: 32px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid var(--border);
+      }
+      .case-ref {
+          font-size: 10px;
+          color: var(--accent);
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          opacity: 0.6;
+          margin-bottom: 10px;
+      }
+      h1 {
+          font-size: 22px;
+          letter-spacing: 3px;
+          color: #fff;
+          text-transform: uppercase;
+          margin-bottom: 4px;
+      }
+      .subtitle {
+          font-size: 11px;
+          color: #334;
+          letter-spacing: 1px;
+      }
+
+      /* ===== STATS ===== */
+      .stats {
+          display: flex;
+          justify-content: center;
+          gap: 32px;
+          margin-bottom: 28px;
+      }
+      .stat { text-align: center; }
+      .stat-value {
+          font-size: 26px;
+          color: var(--yellow);
+          font-weight: 700;
+          font-family: 'Courier New', monospace;
+      }
+      .stat-label {
+          font-size: 10px;
+          color: #446;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-top: 3px;
+      }
+
+      /* ===== GRID ===== */
+      .board {
+          max-width: 900px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+      }
+
+      /* ===== ROW ===== */
+      .board-row {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 10px;
+          align-items: stretch;
+      }
+
+      /* ===== ZAGADKA CARD ===== */
+      .puzzle-card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 16px 20px;
+          transition: all 0.2s;
+      }
+      .puzzle-card.unlocked {
+          border-color: rgba(74,158,255,0.3);
+      }
+      .puzzle-card.unlocked:hover {
+          border-color: var(--accent);
+          box-shadow: 0 0 16px rgba(74,158,255,0.1);
+      }
+      .puzzle-card.solved {
+          background: #0a1a10;
+          border-color: rgba(74,255,140,0.25);
+      }
+      .puzzle-card.locked {
+          opacity: 0.3;
+          pointer-events: none;
+      }
+
+      .puzzle-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+      }
+      .puzzle-ref {
+          font-size: 9px;
+          color: var(--accent);
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          opacity: 0.6;
+      }
+      .puzzle-status { font-size: 14px; }
+
+      .puzzle-title {
+          font-size: 13px;
+          font-weight: 600;
+          color: #fff;
+          margin-bottom: 6px;
+      }
+      .puzzle-hint {
+          font-size: 11px;
+          color: #5a7a9a;
+          line-height: 1.6;
+          font-style: italic;
+      }
+      .puzzle-input-group {
+          margin-top: 14px;
+          display: flex;
+          gap: 8px;
+      }
+      .puzzle-input {
+          flex: 1;
+          padding: 8px 12px;
+          background: rgba(0,0,0,0.4);
+          border: 1px solid var(--border);
+          border-radius: 5px;
+          color: var(--text);
+          font-family: 'Courier New', monospace;
+          font-size: 12px;
+          outline: none;
+          transition: border-color 0.2s;
+      }
+      .puzzle-input:focus { border-color: var(--accent); }
+      .solve-btn {
+          padding: 8px 16px;
+          background: var(--accent);
+          color: #000;
+          border: none;
+          border-radius: 5px;
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.15s;
+      }
+      .solve-btn:hover { background: #6ab8ff; }
+      .puzzle-solved-msg {
+          margin-top: 12px;
+          padding: 8px 12px;
+          background: rgba(74,255,140,0.08);
+          border: 1px solid rgba(74,255,140,0.2);
+          border-radius: 5px;
+          color: #4aff8c;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 1px;
+      }
+      .locked-hint {
+          margin-top: 10px;
+          font-size: 10px;
+          color: #2a3a4a;
+          font-style: italic;
+      }
+
+      /* ===== CHAPTER CARD ===== */
+      .chapter-card {
+          width: 180px;
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 14px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          text-align: center;
+          transition: all 0.2s;
+          flex-shrink: 0;
+      }
+      .chapter-card.locked-chapter {
+          opacity: 0.25;
+          pointer-events: none;
+      }
+      .chapter-card.unlocked-chapter {
+          border-color: rgba(212,175,55,0.4);
+          cursor: pointer;
+          background: #0f1a10;
+      }
+      .chapter-card.unlocked-chapter:hover {
+          border-color: var(--yellow);
+          box-shadow: 0 0 16px rgba(212,175,55,0.15);
+          transform: translateY(-1px);
+      }
+      .chapter-icon {
+          font-size: 22px;
+          opacity: 0.5;
+      }
+      .chapter-card.unlocked-chapter .chapter-icon {
+          opacity: 1;
+      }
+      .chapter-num {
+          font-size: 9px;
+          color: var(--yellow);
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          opacity: 0.5;
+      }
+      .chapter-card.unlocked-chapter .chapter-num {
+          opacity: 1;
+      }
+      .chapter-label {
+          font-size: 11px;
+          color: #446;
+          line-height: 1.3;
+      }
+      .chapter-card.unlocked-chapter .chapter-label {
+          color: #8a9aaa;
+      }
+      .chapter-read-btn {
+          margin-top: 4px;
+          padding: 5px 12px;
+          background: var(--yellow);
+          color: #000;
+          border: none;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: 700;
+          cursor: pointer;
+          letter-spacing: 0.5px;
+          transition: all 0.15s;
+          display: none;
+      }
+      .chapter-card.unlocked-chapter .chapter-read-btn {
+          display: block;
+      }
+      .chapter-read-btn:hover { background: #f0d060; }
+
+      /* ===== SHAKE ===== */
+      .shake { animation: shake 0.4s ease; }
+      @keyframes shake {
+          0%,100%{transform:translateX(0)}
+          20%,60%{transform:translateX(-6px)}
+          40%,80%{transform:translateX(6px)}
+      }
+
+      /* ===== FINISH ===== */
+      .finish-section {
+          text-align: center;
+          margin: 40px 0 20px;
+      }
+      .finish-btn {
+          padding: 16px 52px;
+          background: linear-gradient(135deg,#1a4a8a,#0a2a5a);
+          color: #fff;
+          border: 1px solid var(--accent);
+          border-radius: 6px;
+          font-size: 13px;
+          font-family: 'Courier New', monospace;
+          cursor: pointer;
+          text-transform: uppercase;
+          letter-spacing: 3px;
+          transition: all 0.3s;
+          animation: finPulse 3s infinite;
+      }
+      @keyframes finPulse {
+          0%,100%{box-shadow:0 0 20px rgba(74,158,255,0.2)}
+          50%    {box-shadow:0 0 40px rgba(74,158,255,0.5)}
+      }
+      .finish-btn:hover { background:linear-gradient(135deg,#2a5aaa,#1a3a7a); }
+
+      /* ===== CHAPTER MODAL ===== */
+      .chapter-modal {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.92);
+          z-index: 1000;
+          overflow-y: auto;
+          padding: 40px 20px;
+      }
+      .chapter-modal.active { display: flex; justify-content: center; align-items: flex-start; }
+
+      .chapter-modal-inner {
+          background: #0d1520;
+          border: 1px solid rgba(212,175,55,0.2);
+          border-radius: 10px;
+          max-width: 740px;
+          width: 100%;
+          padding: 32px;
+          position: relative;
+          box-shadow: 0 0 60px rgba(212,175,55,0.08);
+          animation: modalIn 0.4s ease;
+      }
+      .chapter-frame {
+          display: block;
+          width: 100%;
+          height: 320px;
+          border: none;
+          border-radius: 8px;
+          background: transparent;
+          transition: height 0.25s ease;
+      }
+      @keyframes modalIn {
+          from{opacity:0;transform:translateY(12px)}
+          to  {opacity:1;transform:translateY(0)}
+      }
+
+      .chapter-close {
+          position: absolute;
+          top: 14px;
+          right: 18px;
+          background: transparent;
+          border: none;
+          color: #446;
+          font-size: 20px;
+          cursor: pointer;
+          transition: color 0.15s;
+          line-height: 1;
+      }
+      .chapter-close:hover { color: #fff; }
+
+      /* ===== PRZYCISK URUCHAMIANIA MINIGRY ===== */
+      .launch-btn {
+          width: 100%;
+          text-align: center;
+      }
+
+      /* STYL TREŚCI ROZDZIAŁU */
+      .chapter-wrap {
+          font-family: Georgia, 'Times New Roman', serif;
+      }
+      .chapter-number {
+          font-size: 10px;
+          color: var(--yellow);
+          letter-spacing: 3px;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+          opacity: 0.7;
+      }
+      .chapter-title {
+          font-size: 20px;
+          color: #fff;
+          font-weight: 400;
+          margin-bottom: 28px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid rgba(212,175,55,0.15);
+          font-style: italic;
+      }
+      .chapter-body {
+          font-size: 14px;
+          color: #c0ccd8;
+          line-height: 1.95;
+      }
+      .chapter-body p {
+          margin-bottom: 18px;
+          text-align: justify;
+      }
+      .chapter-body p:first-child::first-letter {
+          font-size: 48px;
+          float: left;
+          line-height: 0.8;
+          margin: 6px 8px 0 0;
+          color: var(--yellow);
+          font-family: Georgia, serif;
+      }
+      .chapter-body em { color: #8aaecc; font-style: italic; }
+      .chapter-body strong { color: #e0e8f0; font-weight: 600; }
+      .chapter-body img,
+      .chapter-body video,
+      .chapter-body table,
+      .chapter-body pre {
+          max-width: 100%;
+          height: auto;
+      }
+
+      .chapter-end-marker {
+          text-align: center;
+          margin-top: 32px;
+          padding-top: 20px;
+          border-top: 1px solid rgba(212,175,55,0.1);
+          color: #446;
+          font-size: 12px;
+          letter-spacing: 3px;
+      }
+
+      /* ===== INTRO / TRAILER OVERLAY ===== */
+      .intro-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: #000;
+          z-index: 2000;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 40px 24px;
+          text-align: center;
+      }
+      .intro-overlay.active { display: flex; }
+
+      .intro-content {
+          max-width: 560px;
+      }
+      .intro-tag {
+          font-size: 10px;
+          letter-spacing: 5px;
+          text-transform: uppercase;
+          color: #fff;
+          opacity: 0;
+          margin-bottom: 22px;
+          animation: introFadeUp 0.8s ease forwards;
+          animation-delay: 0.2s;
+      }
+      .intro-title {
+          font-size: 26px;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          color: #fff;
+          font-weight: 700;
+          margin-bottom: 36px;
+          opacity: 0;
+          animation: introFadeUp 0.9s ease forwards;
+          animation-delay: 0.6s;
+      }
+      .intro-line {
+          font-size: 14px;
+          line-height: 1.9;
+          color: #fff;
+          opacity: 0;
+          margin-bottom: 14px;
+          animation: introFadeUp 0.9s ease forwards;
+      }
+      .intro-line:nth-of-type(1) { animation-delay: 1.2s; }
+      .intro-line:nth-of-type(2) { animation-delay: 2.0s; }
+      .intro-line:nth-of-type(3) { animation-delay: 2.8s; }
+      .intro-line:nth-of-type(4) { animation-delay: 3.6s; }
+      .intro-line:nth-of-type(5) { animation-delay: 4.4s; }
+
+      @keyframes introFadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .intro-btn {
+          margin-top: 38px;
+          padding: 14px 38px;
+          background: transparent;
+          color: #fff;
+          border: 1px solid #fff;
+          border-radius: 4px;
+          font-family: inherit;
+          font-size: 12px;
+          letter-spacing: 3px;
+          text-transform: uppercase;
+          cursor: pointer;
+          opacity: 0;
+          animation: introFadeUp 0.9s ease forwards;
+          animation-delay: 5.2s;
+          transition: background 0.2s, color 0.2s;
+      }
+      .intro-btn:hover { background: #fff; color: #000; }
+
+      /* ===== RESPONSIVE ===== */
+      @media(max-width:600px){
+          .board-row { grid-template-columns: 1fr; }
+          .chapter-card { width: 100%; flex-direction: row; }
+          .chapter-modal-inner { padding: 24px 20px; }
+          .intro-title { font-size: 20px; letter-spacing: 2px; }
+          .intro-line { font-size: 13px; }
+      }
+  </style>
+</head>
+<body>
+
+<!-- INTRO / TRAILER -->
+<div class="intro-overlay" id="introOverlay">
+  <div class="intro-content">
+    <div class="intro-tag">KAPO · ref. PG-2026 · dostęp zastrzeżony</div>
+    <div class="intro-title">Operacja Północna Gwiazda</div>
+    <p class="intro-line">Tallinn. Prom MEGASTAR.</p>
+    <p class="intro-line">Zwykły wyjazd obraca się w coś czego nikt nie mógł się spodziewać</p>
+    <p class="intro-line">Na promie jest sekret, za który ludzie gotowi są wiele poświęcić</p>
+    <p class="intro-line">Każde wyzwanie to osobna minigra. </p>
+    <p class="intro-line">Każda ukończona minigra odsłania kolejny rozdział tej historii. Powodzenia</p>
+    <button class="intro-btn" id="introBtn" onclick="closeIntro()">Rozumiem</button>
+  </div>
+</div>
+
+<header>
+  <div class="case-ref">KAPO / ref. PG-2026 · dostęp zastrzeżony</div>
+  <h1>Tablica Śledztwa</h1>
+  <div class="subtitle">Operacja Północna Gwiazda</div>
+</header>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-value" id="solvedCount">0</div>
+    <div class="stat-label">Rozwiązane</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="totalCount">15</div>
+    <div class="stat-label">Łącznie</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="progressPct">0%</div>
+    <div class="stat-label">Postęp</div>
+  </div>
+</div>
+
+<div class="board" id="board"></div>
+
+<div class="finish-section" id="finishSection" style="display:none;">
+  <button class="finish-btn" onclick="openFinale()">⚡ ZAMKNIJ ŚLEDZTWO ⚡</button>
+</div>
+
+<!-- MODAL ROZDZIAŁU -->
+<div class="chapter-modal" id="chapterModal">
+  <div class="chapter-modal-inner">
+    <button class="chapter-close" onclick="closeChapter()">✕</button>
+    <div id="chapterContent"></div>
+  </div>
+</div>
+
+<script>
+  /* =========================
+     MINIGRY
+     Ukończenie minigry (przycisk/zdarzenie w jej
+     wnętrzu wysyłające postMessage) odblokowuje rozdział.
+     Podmieniaj src na swoje pliki HTML.
+  ========================= */
+  const MINIGAMES = [
+    {
+      id: 1,
+      title: "Wspomnienie",
+      desc: "Przesuwaj suwakami aby wyostrzyć obraz",
+      src: "assets/minigames/minigra_9.html",
+      chapter: 1
+    },
+    {
+      id: 2,
+      title: "Lockpick",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_1.html",
+      chapter: 2
+    },
+    {
+      id: 3,
+      title: "WC",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_5.html",
+      chapter: 3
+    },
+    {
+      id: 4,
+      title: "Kindle",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_4.html",
+      chapter: 4
+    },
+    {
+      id: 5,
+      title: "Fala",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_10.html",
+      chapter: 5
+    },
+    {
+      id: 6,
+      title: "Nodelink",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_11.html",
+      chapter: 6
+    },
+    {
+      id: 7,
+      title: "Skaner",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_6.html",
+      chapter: 7
+    },
+    {
+      id: 8,
+      title: "Poszukiwanie",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_3.html",
+      chapter: 8
+    },
+    {
+      id: 9,
+      title: "Zbijak",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_15.html",
+      chapter: 9
+    },
+    {
+      id: 10,
+      title: "Snake",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_14.html",
+      chapter: 10
+    },
+    {
+      id: 11,
+      title: "Catch",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_13.html",
+      chapter: 11
+    },
+    {
+      id: 12,
+      title: "Draw and count",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_2.html",
+      chapter: 12
+    },
+    {
+      id: 13,
+      title: "Ucieknij",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_7.html",
+      chapter: 13
+    },
+    {
+      id: 14,
+      title: "Balance",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_12.html",
+      chapter: 14
+    },
+    {
+      id: 15,
+      title: "Pisz",
+      desc: "Przejdź grę aby odblokować kolejną część historii",
+      src: "assets/minigames/minigra_8.html",
+      chapter: 15
+    }
+  ];
+
+  /* =========================
+     ROZDZIAŁY — placeholder
+     Podmieniaj src na swoje pliki HTML
+  ========================= */
+  const CHAPTERS = [
+    { num: 1,  label: "",        src: "assets/articles/rozdzial_1.html" },
+    { num: 2,  label: "",    src: "assets/articles/rozdzial_2.html" },
+    { num: 3,  label: "",         src: "assets/articles/rozdzial_3.html" },
+    { num: 4,  label: "",         src: "assets/articles/rozdzial_4.html" },
+    { num: 5,  label: "",   src: "assets/articles/rozdzial_5.html" },
+    { num: 6,  label: "",   src: "assets/articles/rozdzial_6.html" },
+    { num: 7,  label: "",      src: "assets/articles/rozdzial_7.html" },
+    { num: 8,  label: "",      src: "assets/articles/rozdzial_8.html" },
+    { num: 9,  label: "",      src: "assets/articles/rozdzial_9.html" },
+    { num: 10, label: "",     src: "assets/articles/rozdzial_10.html" },
+    { num: 11, label: "",     src: "assets/articles/rozdzial_11.html" },
+    { num: 12, label: "",     src: "assets/articles/rozdzial_12.html" },
+    { num: 13, label: "",     src: "assets/articles/rozdzial_13.html" },
+    { num: 14, label: "",     src: "assets/articles/rozdzial_14.html" },
+    { num: 15, label: "",     src: "assets/articles/rozdzial_15.html" }
+  ];
+
+  /* =========================
+     STATE
+  ========================= */
+  let gameState = JSON.parse(localStorage.getItem("megastarGame")) || { solved: {} };
+
+  /* =========================
+     RENDER
+  ========================= */
+  function render() {
+    const board = document.getElementById("board");
+    board.innerHTML = "";
+
+    let solvedCount = 0;
+    const total = MINIGAMES.length;
+
+    MINIGAMES.forEach((game, idx) => {
+      const isSolved   = !!gameState.solved[game.id];
+      const isUnlocked = game.id === 1 || !!gameState.solved[game.id - 1];
+      const chapter    = CHAPTERS[idx];
+      const chapUnlocked = isSolved;
+
+      if (isSolved) solvedCount++;
+
+      const row = document.createElement("div");
+      row.className = "board-row";
+
+      // --- MINIGRA ---
+      const card = document.createElement("div");
+      card.className = `puzzle-card ${isSolved ? "solved" : isUnlocked ? "unlocked" : "locked"}`;
+
+      const statusIcon = isSolved ? "✓" : isUnlocked ? "◈" : "🔒";
+
+      if (isUnlocked) {
+        card.innerHTML = `
+        <div class="puzzle-header">
+          <div class="puzzle-ref">WYZWANIE #${game.id}</div>
+          <div class="puzzle-status">${statusIcon}</div>
+        </div>
+        <div class="puzzle-title">${game.title}</div>
+        <div class="puzzle-hint">${game.desc}</div>
+        ${!isSolved ? `
+          <div class="puzzle-input-group">
+            <button class="solve-btn launch-btn" onclick="openMinigame(${idx})">▶ Uruchom minigrę</button>
+          </div>
+        ` : `
+          <div class="puzzle-solved-msg">✓ MINIGRA UKOŃCZONA</div>
+        `}
+      `;
+      } else {
+        card.innerHTML = `
+        <div class="puzzle-header">
+          <div class="puzzle-ref" style="opacity:.2">WYZWANIE #${game.id}</div>
+          <div class="puzzle-status">🔒</div>
+        </div>
+        <div class="puzzle-title" style="filter:blur(4px);opacity:.2">— utajnione —</div>
+        <div class="locked-hint">Ukończ minigrę #${game.id - 1} aby odblokować.</div>
+      `;
+      }
+
+      // --- ROZDZIAŁ ---
+      const chap = document.createElement("div");
+      chap.className = `chapter-card ${chapUnlocked ? "unlocked-chapter" : "locked-chapter"}`;
+      chap.innerHTML = `
+      <div class="chapter-icon">📖</div>
+      <div class="chapter-num">Rozdział ${chapter.num}</div>
+      <div class="chapter-label">${chapter.label}</div>
+      <button class="chapter-read-btn" onclick="openChapter(${idx})">Czytaj</button>
+    `;
+
+      row.appendChild(card);
+      row.appendChild(chap);
+      board.appendChild(row);
+    });
+
+    // Stats
+    document.getElementById("solvedCount").textContent = solvedCount;
+    document.getElementById("totalCount").textContent  = total;
+    document.getElementById("progressPct").textContent =
+      Math.round(solvedCount / total * 100) + "%";
+
+    if (solvedCount === total) {
+      document.getElementById("finishSection").style.display = "block";
+    }
+  }
+
+  /* =========================
+     MINIGRA — uruchamianie w osobnym oknie
+  ========================= */
+  let currentMinigameIdx = null;
+  let minigameWindowRef  = null;
+
+  function openMinigame(idx) {
+    currentMinigameIdx = idx;
+    const game = MINIGAMES[idx];
+    const url  = `${game.src}?v=${Date.now()}`;
+
+    const w = 800, h = 800;
+    // Jawna pozycja popupu (przesunięty względem głównego okna),
+    // żeby przeglądarka nie próbowała "zmieścić" obu okien obok
+    // siebie kosztem zmniejszenia głównego okna.
+    const left = (window.screenX || window.screenLeft || 0) + 60;
+    const top  = (window.screenY || window.screenTop  || 0) + 60;
+
+    const features = `width=${w},height=${h},left=${left},top=${top},` +
+      "resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no";
+
+    // Ta sama nazwa okna => kolejne kliknięcia podmieniają zawartość
+    // istniejącego okna zamiast mnożyć popupy.
+    minigameWindowRef = window.open(url, "minigameWindow", features);
+
+    if (!minigameWindowRef) {
+      alert(
+        "Przeglądarka zablokowała okienko minigry.\n" +
+        "Zezwól na wyskakujące okienka dla tej strony i kliknij ponownie."
+      );
+      return;
+    }
+    minigameWindowRef.focus();
+  }
+
+  function completeMinigame(id) {
+    gameState.solved[id] = true;
+    localStorage.setItem("megastarGame", JSON.stringify(gameState));
+    if (minigameWindowRef && !minigameWindowRef.closed) {
+      minigameWindowRef.close();
+    }
+    currentMinigameIdx = null;
+    render();
+  }
+
+  // Minigra (osobne okno) zgłasza wygraną przez:
+  // window.opener.postMessage({type:'minigameComplete'}, '*')
+  window.addEventListener("message", e => {
+    if (e.data && e.data.type === "minigameComplete" && currentMinigameIdx !== null) {
+      completeMinigame(MINIGAMES[currentMinigameIdx].id);
+    }
+  });
+
+  /* =========================
+     ROZDZIAŁ MODAL
+  ========================= */
+  async function openChapter(idx) {
+    const chapter = CHAPTERS[idx];
+    const modal   = document.getElementById("chapterModal");
+    const content = document.getElementById("chapterContent");
+
+    content.innerHTML = `
+    <div style="text-align:center;padding:40px;color:#446;font-size:13px;">
+      Ładowanie rozdziału...
+    </div>
+  `;
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+
+    try {
+      const res  = await fetch(chapter.src + "?v=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) throw new Error("not found");
+      const html = await res.text();
+
+      // Rozdział renderujemy w iframe — nie wstrzykujemy go bezpośrednio
+      // do strony przez innerHTML. Dzięki temu, jeśli plik rozdziału ma
+      // własny <style> (np. body { display:flex; ... }), te reguły
+      // zostają w 100% odizolowane i nigdy nie "wyciekną" do tablicy,
+      // niezależnie jak rozdział jest napisany.
+      content.innerHTML = "";
+      const iframe = document.createElement("iframe");
+      iframe.className = "chapter-frame";
+      iframe.srcdoc = html;
+      content.appendChild(iframe);
+
+      iframe.addEventListener("load", () => {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow.document;
+          const h = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+          const maxH = Math.round(window.innerHeight * 0.8);
+          iframe.style.height = Math.min(h + 4, maxH) + "px";
+        } catch (err) {
+          // zostaje wysokość domyślna z CSS
+        }
+      });
+    } catch {
+      content.innerHTML = `
+      <div class="chapter-wrap">
+        <div class="chapter-number">Rozdział ${chapter.num}</div>
+        <div class="chapter-title">${chapter.label}</div>
+        <div class="chapter-body">
+          <p style="color:#446;font-style:italic;text-align:center;padding:40px 0;">
+            Ten rozdział nie został jeszcze dodany.<br>
+            <span style="font-size:11px;opacity:0.5;">
+              Umieść plik w: assets/articles/rozdzial_${chapter.num}.html
+            </span>
+          </p>
+        </div>
+      </div>
+    `;
+    }
+  }
+
+  function closeChapter() {
+    document.getElementById("chapterModal").classList.remove("active");
+    document.body.style.overflow = "";
+    window.scrollTo({ left: 0 }); // zabezpieczenie przed przesunięciem strony w bok
+  }
+
+  // Zamknij klikając tło
+  document.getElementById("chapterModal").addEventListener("click", e => {
+    if (e.target === document.getElementById("chapterModal")) closeChapter();
+  });
+
+  // ESC
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeChapter();
+    if (e.ctrlKey && e.shiftKey && e.key === "R") {
+      if (confirm("Zresetować tablicę?")) {
+        localStorage.removeItem("megastarGame");
+        localStorage.removeItem("megastarIntroSeen");
+        location.reload();
+      }
+    }
+  });
+
+  /* =========================
+     FINALE
+  ========================= */
+  function openFinale() {
+    alert(
+      "OPERACJA PÓŁNOCNA GWIAZDA\n\n" +
+      "Gratulacje! To koniec...ale czy aby na pewno?\n\n\n\n" +
+      "Reset gry: CTRL+SHIFT+R"
+
+    );
+  }
+
+  /* =========================
+     INTRO / TRAILER
+  ========================= */
+  function showIntro() {
+    document.getElementById("introOverlay").classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeIntro() {
+    localStorage.setItem("megastarIntroSeen", "true");
+    document.getElementById("introOverlay").classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  /* =========================
+     START
+  ========================= */
+  render();
+  if (!localStorage.getItem("megastarIntroSeen")) {
+    showIntro();
+  }
+
+</script>
 </body>
 </html>
