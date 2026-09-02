@@ -1,0 +1,317 @@
+<!-- trzymanie kropki w srodku -->
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KAPO - Balans Sygnału</title>
+  <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+          background: #020a05;
+          color: #33ff33;
+          font-family: 'Courier New', monospace;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+          user-select: none;
+      }
+
+      .game-box {
+          width: 440px;
+          background: #000200;
+          border: 3px solid #114411;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 0 35px rgba(51, 255, 51, 0.2);
+      }
+
+      .header {
+          text-align: center;
+          margin-bottom: 15px;
+          border-bottom: 1px dashed #114411;
+          padding-bottom: 12px;
+      }
+      .header h1 { font-size: 16px; letter-spacing: 2px; text-transform: uppercase; color: #55ff55; }
+
+      .instructions {
+          background: rgba(17, 68, 17, 0.15);
+          border: 1px solid #114411;
+          border-radius: 6px;
+          padding: 10px 12px;
+          font-size: 11px;
+          line-height: 1.5;
+          color: #aaffaa;
+          margin-bottom: 15px;
+      }
+      .instructions span { color: #33ff33; font-weight: bold; }
+
+      .canvas-container {
+          position: relative;
+          margin-bottom: 15px;
+      }
+
+      #balancerCanvas {
+          background: #000000;
+          border: 2px solid #114411;
+          border-radius: 8px;
+          display: block;
+      }
+
+      .stats-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          background: #031405;
+          padding: 10px;
+          border-radius: 6px;
+          border: 1px solid #114411;
+          font-size: 11px;
+      }
+      .stat-item { display: flex; flex-direction: column; }
+      .stat-label { color: #227722; text-transform: uppercase; font-size: 9px; margin-bottom: 2px; }
+      .stat-val { font-size: 15px; font-weight: bold; }
+
+      .overlay {
+          display: none; position: fixed; inset: 0; background: rgba(0, 2, 0, 0.97);
+          z-index: 100; justify-content: center; align-items: center; flex-direction: column;
+      }
+      .overlay.active { display: flex; }
+      .overlay h2 { font-size: 22px; margin-bottom: 20px; text-align: center; text-transform: uppercase; color: #33ff33; }
+      .btn {
+          background: #33ff33; color: #000000; border: 0; padding: 12px 28px;
+          font-family: inherit; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase;
+      }
+  </style>
+</head>
+<body>
+
+<div class="game-box">
+  <div class="header">
+    <h1>SIGNAL_BALANCER // FREQ_STABILIZER</h1>
+  </div>
+
+  <div class="instructions">
+    <strong>UTRZYMANIE SYGNAŁU:</strong> Szum radiowy spycha kropkę! Używaj klawiszy <span>A / D</span> lub <span>STRZAŁEK</span>, aby utrzymać ją w centralnej, bezpiecznej zielonej strefie przez 20 sekund!
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="balancerCanvas" width="400" height="150"></canvas>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-label">Pozostały czas strefy</div>
+      <div class="stat-val" id="timeText" style="color: #33ff33;">20.0s</div>
+    </div>
+    <div class="stat-item" style="text-align: right;">
+      <div class="stat-label">Status Linku</div>
+      <div class="stat-val" id="statusText" style="color: #55ff55;">STABILNY</div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="endOverlay">
+  <h2 id="endTitle">POŁĄCZENIE ZABALANSOWANE!</h2>
+  <button class="btn" onclick="initGame()">RESTART</button>
+</div>
+
+<script>
+  const canvas = document.getElementById("balancerCanvas");
+  const ctx = canvas.getContext("2d");
+  const timeText = document.getElementById("timeText");
+  const statusText = document.getElementById("statusText");
+  const endOverlay = document.getElementById("endOverlay");
+  const endTitle = document.getElementById("endTitle");
+
+  let isGameOver = false;
+  let timeLeft = 20.0; // Czas w sekundach do wytrzymania w strefie
+
+  // Pozycja kropki (od 0 do canvas.width)
+  let signalX = canvas.width / 2;
+  let signalVelocity = 0;
+
+  // Szerokość bezpiecznej strefy (zgodna z rysowaniem: 120 pikseli na środku)
+  const safeZoneWidth = 120;
+  const safeZoneLeft = canvas.width / 2 - safeZoneWidth / 2;
+  const safeZoneRight = canvas.width / 2 + safeZoneWidth / 2;
+
+  // Siła zakłóceń (zmienia się losowo w czasie)
+  let noiseForce = 0;
+  let noiseTimer = 0;
+
+  const keys = { left: false, right: false };
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.left = true;
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.right = true;
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.left = false;
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.right = false;
+  });
+
+  function initGame() {
+    isGameOver = false;
+    timeLeft = 20.0;
+    signalX = canvas.width / 2;
+    signalVelocity = 0;
+    noiseForce = 0;
+    noiseTimer = 0;
+
+    endOverlay.classList.remove("active");
+    statusText.textContent = "STABILNY";
+    statusText.style.color = "#55ff55";
+    timeText.style.color = "#33ff33";
+
+    if (!window.balancerAnimation) {
+      window.balancerAnimation = true;
+      requestAnimationFrame(gameLoop);
+    }
+  }
+
+  function updatePhysics() {
+    // 1. Generowanie losowego szarpnięcia sygnału (szum środowiskowy)
+    noiseTimer--;
+    if (noiseTimer <= 0) {
+      noiseForce = (Math.random() - 0.5) * 1.3;
+      noiseTimer = Math.floor(Math.random() * 30) + 15; // Zmiana co 15-45 klatek
+    }
+
+    // Aplikowanie szumu do prędkości kropki
+    signalVelocity += noiseForce;
+
+    // 2. Kontra ze strony gracza
+    const playerForce = 0.6;
+    if (keys.left) signalVelocity -= playerForce;
+    if (keys.right) signalVelocity += playerForce;
+
+    // Opór środowiska
+    signalVelocity *= 0.92;
+
+    // Aktualizacja pozycji
+    signalX += signalVelocity;
+
+    // 3. Sprawdzanie warunków przegranej (wypadnięcie poza ekran/linie śmierci)
+    if (signalX <= 20 || signalX >= canvas.width - 20) {
+      endGame(false);
+      return;
+    }
+
+    // 4. Logika odliczania czasu - tylko w bezpiecznej strefie!
+    const isInSafeZone = (signalX >= safeZoneLeft && signalX <= safeZoneRight);
+
+    if (isInSafeZone) {
+      timeLeft -= 1 / 60; // Zakładamy stabilne 60fps
+      if (timeLeft <= 0) {
+        timeLeft = 0;
+        endGame(true);
+      }
+      timeText.style.color = "#33ff33"; // Zielony kolor licznika, gdy czas leci
+    } else {
+      // Kiedy gracz jest poza strefą, licznik lekko "mruga" ostrzegawczo na pomarańczowo/czerwono
+      timeText.style.color = Math.floor(Date.now() / 200) % 2 === 0 ? "#ffaa00" : "#ff3333";
+    }
+
+    timeText.textContent = `${timeLeft.toFixed(1)}s`;
+
+    // Dynamiczny tekst ostrzegawczy na bazie odległości od środka
+    let distanceFromCenter = Math.abs(signalX - canvas.width / 2);
+    if (distanceFromCenter > canvas.width * 0.35) {
+      statusText.textContent = "KRYTYCZNY";
+      statusText.style.color = "#ff3333";
+    } else if (!isInSafeZone) {
+      statusText.textContent = "NIESTABILNY";
+      statusText.style.color = "#ffaa00";
+    } else {
+      statusText.textContent = "STABILNY";
+      statusText.style.color = "#55ff55";
+    }
+  }
+
+  function drawInterface() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Rysowanie fali szumu w tle
+    ctx.strokeStyle = "rgba(17, 68, 17, 0.2)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i < canvas.width; i += 5) {
+      let yNoise = canvas.height / 2 + (Math.sin(i * 0.05 + Date.now() * 0.005) * 15) + (Math.random() - 0.5) * 4;
+      if (i === 0) ctx.moveTo(i, yNoise);
+      else ctx.lineTo(i, yNoise);
+    }
+    ctx.stroke();
+
+    // Główna oś wskaźnika
+    const centerY = canvas.height / 2 + 10;
+    ctx.strokeStyle = "#114411";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(20, centerY);
+    ctx.lineTo(canvas.width - 20, centerY);
+    ctx.stroke();
+
+    // Bezpieczna zielona strefa (środek)
+    ctx.fillStyle = "rgba(51, 255, 51, 0.15)";
+    ctx.fillRect(safeZoneLeft, centerY - 25, safeZoneWidth, 50);
+    ctx.strokeStyle = "rgba(51, 255, 51, 0.4)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(safeZoneLeft, centerY - 25, safeZoneWidth, 50);
+
+    // Skrajne blokady (linie śmierci)
+    ctx.strokeStyle = "#ff3333";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, centerY - 15); ctx.lineTo(20, centerY + 15);
+    ctx.moveTo(canvas.width - 20, centerY - 15); ctx.lineTo(canvas.width - 20, centerY + 15);
+    ctx.stroke();
+
+    // Rysowanie impulsu sygnału (gracza)
+    ctx.fillStyle = "#33ff33";
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = "#33ff33";
+    ctx.beginPath();
+    ctx.arc(signalX, centerY, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mały biały rdzeń w środku kropki
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.arc(signalX, centerY, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function gameLoop() {
+    if (isGameOver) {
+      window.balancerAnimation = false;
+      return;
+    }
+
+    updatePhysics();
+    drawInterface();
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  function endGame(success) {
+    isGameOver = true;
+    endOverlay.classList.add("active");
+    if (success) {
+      endTitle.textContent = "SYNCHRONIZACJA ZAKOŃCZONA SUKCESEM!";
+      endTitle.style.color = "#33ff33";
+      (window.opener || window.parent).postMessage({ type: "minigameComplete" }, "*");
+    } else {
+      endTitle.textContent = "ZERWANIE POŁĄCZENIA. SYGNAŁ ZAGUBIONY!";
+      endTitle.style.color = "#ff3333";
+    }
+  }
+
+  initGame();
+</script>
+</body>
+</html>

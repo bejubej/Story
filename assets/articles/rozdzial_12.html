@@ -1,0 +1,163 @@
+
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rozdział</title>
+  <style>
+      /* Reset podstawowych stylów */
+      *, *::before, *::after {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+      }
+
+      /* Ciemna, klasyczna stylistyka */
+      body {
+          background-color: #121212; /* Głęboka czerń tła */
+          color: #e0e0e0;           /* Stonowana biel tekstu */
+          font-family: 'Georgia', 'Times New Roman', Times, serif; /* Klasyczny krój książkowy */
+          line-height: 1.75;
+          letter-spacing: 0.01em;
+          padding: 40px 20px;
+          display: flex;
+          justify-content: center;
+      }
+
+      /* Kontener ograniczający szerokość tekstu dla łatwego czytania */
+      .book-container {
+          max-width: 680px;
+          width: 100%;
+      }
+
+      /* Nagłówek rozdziału */
+      header {
+          margin-bottom: 3rem;
+          text-align: center;
+      }
+
+      .chapter-number {
+          font-size: 1.2rem;
+          font-style: italic;
+          color: #b39ddb;            /* Subtelny fioletowy akcent */
+          margin-bottom: 0.5rem;
+          display: block;
+      }
+
+      h1.chapter-title {
+          font-size: 2.2rem;
+          line-height: 1.3;
+          color: #ffffff;
+          font-weight: normal;
+      }
+
+      /* Treść rozdziału */
+      .chapter-content {
+          font-size: 1.15rem;
+          text-align: justify;      /* Klasyczne wyrównanie tekstu */
+          text-justify: inter-word;
+      }
+
+      .chapter-content p {
+          margin-bottom: 1.25rem;
+      }
+
+      /* Inicjał (Drop Cap) dla pierwszego akapitu */
+      .chapter-content p:first-of-type::first-letter {
+          font-size: 3.5rem;
+          float: left;
+          line-height: 1;
+          padding-right: 8px;
+          color: #b39ddb;
+      }
+
+      /* Cytat / Myśli (opcjonalnie) */
+      blockquote {
+          font-style: italic;
+          margin: 2rem 1.5rem;
+          padding-left: 1rem;
+          border-left: 2px solid #b39ddb;
+          color: #b0b0b0;
+      }
+
+      /* Separator sekcji (gwiazdki - opcjonalnie) */
+      .section-divider {
+          text-align: center;
+          margin: 3rem 0;
+          font-size: 1.2rem;
+          letter-spacing: 0.5em;
+          color: #555555;
+      }
+
+      /* Dopasowanie do ekranów telefonów */
+      @media (max-width: 600px) {
+          body { padding: 20px 15px; }
+          h1.chapter-title { font-size: 1.8rem; }
+          .chapter-content { font-size: 1.05rem; text-align: left; }
+          .chapter-content p:first-of-type::first-letter { font-size: 3rem; }
+      }
+  </style>
+</head>
+<body>
+
+<div class="book-container">
+
+  <header>
+    <span class="chapter-number">Rozdział XII</span>
+  </header>
+
+  <main class="chapter-content">
+
+    <p>Rękaw pasażerski był zatłoczony i duszny. Mäkinen szedł ramię w ramię z Ewą, mocno trzymając ją za łokieć. Kilka kroków przed nimi Liis Saar prowadziła zrezygnowanego Bartka. Wokół nich przetaczało się kilkuset pasażerów – turyści z walizkami, rodziny z dziećmi, głośni robotnicy wracający na weekend do Finlandii. Idealna ludzka tarcza.</p>
+
+    <p>Gdy tylko minęli przeszklony tunel i weszli do głównej hali przylotów terminalu, Aleksander zlokalizował wzrokiem dwóch agentów fińskiego SUPO. Stali przy barierkach, czujni, udając, że sprawdzają coś w telefonach. Dzieliło ich zaledwie trzydzieści metrów.</p>
+
+    <p>W tym samym momencie potężny, piskliwy sygnał syreny alarmowej rozdarł przestrzeń terminalu.</p>
+
+
+    <blockquote>„Uwaga! Wykryto zagrożenie pożarowe. Prosimy natychmiast skierować się do najbliższych wyjść ewakuacyjnych!” – mechaniczny głos z głośników natychmiast powtórzył komunikat po fińsku i angielsku.</blockquote>
+
+    <p>W jednej sekundzie systemy bezpieczeństwa automatycznie zablokowały ruchome schody, a na dół zaczęły opuszczać się ciężkie, przeciwpożarowe kurtyny. Wśród pasażerów wybuchła panika. Ludzie stojący z tyłu zaczęli napierać na tych z przodu, krzycząc i porzucając ciężkie walizki. Przejście do agentów SUPO zostało całkowicie odcięte przez spanikowaną, napierającą ludzką masę.</p>
+
+    <blockquote>– Trzymaj go! – wrzasnął Mäkinen do Liis, próbując osłonić Ewę przed tratującym ich tłumem.</blockquote>
+
+    <p>Nagle ktoś potężnie uderzył go barkiem. To nie był przypadkowy ruch uciekającego turysty. Cios był chirurgicznie precyzyjny, wymierzony w splot słoneczny tak, by na sekundę odebrać Aleksandrowi oddech. Mäkinen zgiął się wpół, automatycznie puszczając rękę Ewy.</p>
+
+    <p>Napastnikiem był postawny mężczyzna w ciemnej kurtce. Działał z zimną, bezwzględną kalkulacją. Dla GRU twarze Aleksandra Mäkinena i Liis Saar nie były anonimowe – ich wizerunki figurowały w rosyjskich bazach danych wywiadowczych. Szpieg od razu zauważył „obserwatorów” z SUPO, a od łącznika z Tallinna miał precyzyjny namiar: celem była polska para i ukryty w Kindle'u program. Gdy dostrzegł specyficzne, grube etui Faradaya w dłoni Mäkinena, dostał ostateczne potwierdzenie.</p>
+
+    <p>Zanim Aleksander zdołał wyprostować sylwetkę i sięgnąć po broń, poczuł potężne szarpnięcie. Napastnik jednym ruchem wyrwał mu z ręki worek Faradaya z czytnikiem w środku.</p>
+
+    <blockquote>– Stój! – wycharczał Mäkinen, ale jego głos utonął w ryczeniu syren.</blockquote>
+
+    <p>Rosjanin błyskawicznie ocenił sytuację. Główna hala była zablokowana przez Finów z SUPO i straż portową. Droga ucieczki na zewnątrz przez terminal była odcięta. Szpieg odwrócił się więc na pięcie i ruszył w jedynym wolnym kierunku – z powrotem w stronę rękawa i promu, pod prąd uciekającego tłumu.</p>
+
+    <p>Mäkinen, ignorując ból w klatce piersiowej, ruszył w pogoń.</p>
+
+    <blockquote>– Liis, zostań z nimi! Pilnuj ich! – wrzasnął przez ramię, przedzierając się przez zszokowanych ludzi.</blockquote>
+
+    <p>Rosjanin dopadł do bocznych, zamkniętych dla pasażerów drzwi technicznych z napisem Staff Only, zlokalizowanych w połowie rękawa pasażerskiego. Jednym kopnięciem sforsował zamek i wpadł na stalową, zewnętrzną klatkę schodową służącą dla obsługi naziemnej. Mäkinen wpadł tam sekundę po nim.</p>
+
+    <p>Szpieg zbiegał po stopniach na złamanie karku. W trakcie biegu jedną ręką szarpał się z zabezpieczeniem pokrowca. Gdy rzep puścił, wyszarpnął ze środka plastikową obudowę Kindle'a, a sam worek Faradaya rzucił pod nogi goniącego go agenta.</p>
+
+    <p>Urządzenie, po raz pierwszy od kilkunastu minut, odzyskało kontakt ze światem zewnętrznym.</p>
+
+    <p>Dla uśpionego programu szpiegowskiego to był impuls, na który czekał. Procesor w ułamek sekundy wybudził się z hibernacji. Kindle natychmiast zalogował się do najbliższego, silnego przekaźnika sieci komórkowej na fińskim brzegu.</p>
+
+    <p>Mäkinen zbiegał po stopniach, wyciągając z kabury pistolet i celując w plecy uciekającego mężczyzny, który właśnie dopadał do poziomu asfaltu – prosto na techniczną płytę nabrzeża, gdzie z dolnych pokładów Megastara z głośnym rykiem silników zaczynały właśnie wyjeżdżać pierwsze ciężarówki.</p>
+
+    <blockquote>– Stój, bo strzelam! – huknął po angielsku.</blockquote>
+
+
+
+
+
+    <div class="section-divider">***</div>
+
+
+
+  </main>
+
+</div>
+
+</body>
+</html>

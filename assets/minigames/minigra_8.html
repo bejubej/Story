@@ -1,0 +1,166 @@
+<!-- wpiywanie slow na czas -->
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PÕHJATÄHT - Protokół Samozniszczenia</title>
+  <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+          background: #06090e; color: #00ff66;
+          font-family: 'Courier New', monospace;
+          min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;
+      }
+      .game-box {
+          width: 500px; background: #0c1017; border: 2px solid #00ff66; border-radius: 8px;
+          padding: 25px; text-align: center; box-shadow: 0 0 20px rgba(0,255,102,0.2);
+      }
+      h1 { font-size: 20px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+      .subtitle { font-size: 11px; color: #8b949e; margin-bottom: 20px; text-transform: uppercase; }
+      .display-box {
+          background: #010409; padding: 20px; border-radius: 6px; border: 1px solid #30363d;
+          margin-bottom: 20px; min-height: 100px; display: flex; flex-direction: column; justify-content: center;
+      }
+      .target-code { font-size: 28px; font-weight: bold; letter-spacing: 3px; color: #ffffff; margin-bottom: 5px; }
+      .progress-container { background: #161b22; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #30363d; }
+      .bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; color: #ff3d3d; font-weight: bold; }
+      .bar-bg { width: 100%; height: 12px; background: #010409; border-radius: 3px; overflow: hidden; }
+      .bar-fill { width: 0%; height: 100%; background: #ff3d3d; transition: width 0.1s linear; }
+      .code-input {
+          width: 100%; background: #010409; border: 1px solid #00ff66; color: #ffffff;
+          padding: 12px; font-size: 20px; font-family: inherit; text-align: center; border-radius: 6px; letter-spacing: 2px;
+      }
+      .code-input:focus { outline: none; box-shadow: 0 0 10px rgba(0,255,102,0.5); }
+      .score-info { margin-top: 15px; font-size: 13px; color: #8b949e; }
+      .overlay {
+          display: none; position: fixed; inset: 0; background: rgba(1,4,9,0.98);
+          z-index: 100; justify-content: center; align-items: center; flex-direction: column; padding: 20px;
+      }
+      .overlay.active { display: flex; }
+      .overlay h2 { font-size: 32px; margin-bottom: 15px; text-transform: uppercase; }
+      .overlay p { margin-bottom: 25px; color: #8b949e; text-align: center; max-width: 400px; line-height: 1.6; }
+      .btn {
+          background: #00ff66; color: #06090e; border: 0; padding: 14px 35px;
+          font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-family: inherit;
+      }
+  </style>
+</head>
+<body>
+
+<div class="game-box">
+  <h1>KAPO // DATA PURGE</h1>
+  <div class="subtitle">Procedura samozniszczenia pamięci czytnika</div>
+
+  <div class="progress-container">
+    <div class="bar-label">
+      <span>WROGI TRANSFER DANYCH:</span>
+      <span id="percentText">0%</span>
+    </div>
+    <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
+  </div>
+
+  <div class="display-box">
+    <div style="font-size: 11px; color: #8b949e; margin-bottom: 5px;">PRZEPISZ KOD AUTORYZACYJNY:</div>
+    <div class="target-code" id="targetCode">K4P0_SYS</div>
+  </div>
+
+  <input type="text" id="codeInput" class="code-input" placeholder="Wpisz kod tutaj..." autocomplete="off">
+
+  <div class="score-info">
+    Zniszczone pakiety danych: <span id="destroyedCount" style="color:#fff; font-weight:bold;">0/8</span>
+  </div>
+</div>
+
+<div class="overlay" id="endOverlay">
+  <h2 id="endTitle">Status</h2>
+  <p id="endDesc"></p>
+  <button class="btn" onclick="resetGame()">Uruchom ponownie</button>
+</div>
+
+<script>
+  const targetCode = document.getElementById("targetCode");
+  const codeInput = document.getElementById("codeInput");
+  const barFill = document.getElementById("barFill");
+  const percentText = document.getElementById("percentText");
+  const destroyedCount = document.getElementById("destroyedCount");
+  const endOverlay = document.getElementById("endOverlay");
+  const endTitle = document.getElementById("endTitle");
+  const endDesc = document.getElementById("endDesc");
+
+  let enemyProgress = 0;
+  let destroyedPackets = 0;
+  let isGameOver = false;
+  let gameLoop = null;
+
+  const codePool = ["K4P07ALL1NN", "P0HJA7AH7", "SUP0HELS1NK1", "SYSPURG399", "FLASHCR4SH", "M4K1N3N_55", "MEGASTAR", "TALLINN"];
+
+  function generateCode() {
+    const randomIndex = Math.floor(Math.random() * codePool.length);
+    targetCode.textContent = codePool[randomIndex];
+  }
+
+  function initGame() {
+    enemyProgress = 0;
+    destroyedPackets = 0;
+    isGameOver = false;
+    endOverlay.classList.remove("active");
+    codeInput.value = "";
+    destroyedCount.textContent = "0/8";
+    generateCode();
+    codeInput.focus();
+
+    clearInterval(gameLoop);
+    gameLoop = setInterval(() => {
+      // Zbalansowana prędkość – teraz rośnie o 0.25% zamiast 0.7%
+      enemyProgress += 0.25;
+      if (enemyProgress >= 100) {
+        enemyProgress = 100;
+        endGame(false);
+      }
+      barFill.style.width = enemyProgress + "%";
+      percentText.textContent = Math.floor(enemyProgress) + "%";
+    }, 50);
+  }
+
+  codeInput.addEventListener("input", () => {
+    if (isGameOver) return;
+
+    if (codeInput.value.trim() === targetCode.textContent) {
+      destroyedPackets++;
+      destroyedCount.textContent = `${destroyedPackets}/8`;
+
+      // Zwiększony bonus – cofa transfer o 25% zamiast 15%
+      enemyProgress = Math.max(0, enemyProgress - 19);
+
+      codeInput.value = "";
+
+      if (destroyedPackets >= 8) {
+        endGame(true);
+      } else {
+        generateCode();
+      }
+    }
+  });
+
+  function endGame(success) {
+    isGameOver = true;
+    clearInterval(gameLoop);
+    endOverlay.classList.add("active");
+
+    if (success) {
+      endTitle.textContent = "DANE CZYSTE!";
+      endTitle.style.color = "#00ff66";
+      endDesc.textContent = "Udało się!.";
+      (window.opener || window.parent).postMessage({ type: "minigameComplete" }, "*");
+    } else {
+      endTitle.textContent = "PRZEJĘCIE DANYCH!";
+      endTitle.style.color = "#ff3d3d";
+      endDesc.textContent = "Porażka. Wrogi agent zdołał pobrać 100% struktury kodu.";
+    }
+  }
+
+  function resetGame() { initGame(); }
+  window.onload = initGame;
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rozdział</title>
+  <style>
+      /* Reset podstawowych stylów */
+      *, *::before, *::after {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+      }
+
+      /* Ciemna, klasyczna stylistyka */
+      body {
+          background-color: #121212; /* Głęboka czerń tła */
+          color: #e0e0e0;           /* Stonowana biel tekstu */
+          font-family: 'Georgia', 'Times New Roman', Times, serif; /* Klasyczny krój książkowy */
+          line-height: 1.75;
+          letter-spacing: 0.01em;
+          padding: 40px 20px;
+          display: flex;
+          justify-content: center;
+      }
+
+      /* Kontener ograniczający szerokość tekstu dla łatwego czytania */
+      .book-container {
+          max-width: 680px;
+          width: 100%;
+      }
+
+      /* Nagłówek rozdziału */
+      header {
+          margin-bottom: 3rem;
+          text-align: center;
+      }
+
+      .chapter-number {
+          font-size: 1.2rem;
+          font-style: italic;
+          color: #b39ddb;            /* Subtelny fioletowy akcent */
+          margin-bottom: 0.5rem;
+          display: block;
+      }
+
+      h1.chapter-title {
+          font-size: 2.2rem;
+          line-height: 1.3;
+          color: #ffffff;
+          font-weight: normal;
+      }
+
+      /* Treść rozdziału */
+      .chapter-content {
+          font-size: 1.15rem;
+          text-align: justify;      /* Klasyczne wyrównanie tekstu */
+          text-justify: inter-word;
+      }
+
+      .chapter-content p {
+          margin-bottom: 1.25rem;
+      }
+
+      /* Inicjał (Drop Cap) dla pierwszego akapitu */
+      .chapter-content p:first-of-type::first-letter {
+          font-size: 3.5rem;
+          float: left;
+          line-height: 1;
+          padding-right: 8px;
+          color: #b39ddb;
+      }
+
+      /* Cytat / Myśli (opcjonalnie) */
+      blockquote {
+          font-style: italic;
+          margin: 2rem 1.5rem;
+          padding-left: 1rem;
+          border-left: 2px solid #b39ddb;
+          color: #b0b0b0;
+      }
+
+      /* Separator sekcji (gwiazdki - opcjonalnie) */
+      .section-divider {
+          text-align: center;
+          margin: 3rem 0;
+          font-size: 1.2rem;
+          letter-spacing: 0.5em;
+          color: #555555;
+      }
+
+      /* Dopasowanie do ekranów telefonów */
+      @media (max-width: 600px) {
+          body { padding: 20px 15px; }
+          h1.chapter-title { font-size: 1.8rem; }
+          .chapter-content { font-size: 1.05rem; text-align: left; }
+          .chapter-content p:first-of-type::first-letter { font-size: 3rem; }
+      }
+  </style>
+</head>
+<body>
+
+<div class="book-container">
+
+  <header>
+    <span class="chapter-number">Rozdział I</span>
+    <h1 class="chapter-title">Terminal D, Tallinn. Godzina 13:10</h1>
+  </header>
+
+  <main class="chapter-content">
+
+    <p>Mäkinen wyszedł z pokoju przesłuchań i zamknął za sobą ciężkie, stalowe drzwi. W korytarzu technicznym unosił się zapach oleju napędowego i spalin ze schodzących poniżej samochodów. Prom wyraźnie zwalniał, a potężne wibracje bocznych pędników sterujących zwiastowały, że Megastar właśnie rozpoczyna manewr cumowania w helsińskim porcie Länsiterminaali.</p>
+
+    <p>Liis Saar zgodnie z rozkazem zamknęła kantorek, w którym trzymała chłopaka, i podeszła do Aleksandra. Gdy zobaczyła zabezpieczony worek Faradaya w jego dłoni, natychmiast zniżyła głos.</p>
+    <blockquote>– I jak? – zapytała cicho.</blockquote>
+
+<blockquote>– Dziewczyna jest czysta. To żywa tarcza – rzucił krótko Mäkinen, chowając etui do głębokiej kieszeni płaszcza. – Klasyczny profil nieświadomego muła. Wszystko zorganizował chłopak. Kupił bilety do Tallinna na jej urodziny, zaplanował trasę, kontrolował logistykę, a wczoraj wieczorem nagle dokupił rejs do Finlandii. Oficjalnie jest bezrobotny, pracuje gdzieś na czarno.</blockquote>
+
+    <p>Liis zmarszczyła brwi, a na jej twarzy zamiast satysfakcji odmalowało się głębokie zaniepokojenie.</p>
+
+    <blockquote>– Aleksander... coś mi tu nie pasuje. Rozmawiałam z tym chłopakiem. W jego oczach był czysty, autentyczny strach, ledwo składał zdania. Kiedy zaczęłam go pytać o to, co robił wczoraj na starym mieście i dlaczego tak długo nie wracał z kawiarni, plątał się, ale... to nie były kłamstwa profesjonalisty. Oni oboje wyglądają na autentycznie przerażonych. A jeśli są niewinni? Jeśli ktoś ich po prostu wystawił jako idealne kozły ofiarne?</blockquote>
+
+    <p>Mäkinen machnął lekko ręką, ucinając jej wątpliwości.</p>
+
+    <blockquote>– Na ten moment to bez znaczenia, Liis. Mamy czytnik, a to jest nasz priorytet. Ich intencje zbada sekcja śledcza w Tallinnie, jak już wrócimy. Na razie musimy dostarczyć towar na brzeg.</blockquote>
+
+    <blockquote>– Jak ich wyprowadzamy? – zapytała Saar, wciąż nieprzekonana.</blockquote>
+
+    <blockquote>– Idziemy normalnie, głównym rękawem dla pasażerów. Wtopimy się w tłum, ty prowadzisz chłopaka, ja dziewczynę. Finowie z SUPO czekają już bezpośrednio przy wyjściu z rękawa, w strefie przylotów terminala. Przejmą ich w ułamek sekundy, nikt z cywilów się nawet nie zorientuje.</blockquote>
+
+
+<p>Głuchy, potężny jęk uderzenia kadłuba o gumowe odbojnice nabrzeża przetoczył się przez stalowe ściany korytarza. Dopłynęli. Byli w Finlandii.</p>
+
+    <p>Mäkinen wyciągnął z kieszeni telefon i wysłał krótki, szyfrowany meldunek do bazy w Tallinnie: „Cel zabezpieczony. Schodzimy na ląd przez główny rękaw”. Był absolutnie przekonany, że sytuacja jest pod kontrolą.</p>
+
+
+<p>Nie miał jednak pojęcia, że w tym samym momencie planowany przez Rosjan scenariusz właśnie brał w łeb.</p>
+
+    <p>Gdzieś w rejonie portu Jätkäsaari, w bezpiecznej i ukrytej lokalizacji, działała automatyczna, szerokopasmowa stacja odbiorcza. Plan zakładał, że gdy tylko prom zbliży się do nabrzeża, ukryty w Kindlu program wykryje silny, dedykowany sygnał, błyskawicznie zrzuci całą skompresowaną paczkę danych z bazy NATO, a następnie wymaże pamięć urządzenia, nie zostawiając żadnych śladów.</p>
+
+    <p>Odbiornik jednak milczał. Megastar właśnie dotknął nabrzeża, a serwery nie zarejestrowały ani jednego przesłanego bajtu danych.</p>
+
+    <p>Informacja o braku transferu natychmiast trafiła na zakodowany telefon mężczyzny, który od kilkunastu minut krążył samochodem w okolicach portu. Nie był informatykiem – był oficerem operacyjnym GRU, wysłanym do Helsinek tylko po to, by nadzorować całą akcję z bezpiecznej odległości i upewnić się, że „towar” dotarł na miejsce.</p>
+
+<p>Gdy na ekranie jego smartfona wyświetlił się komunikat o pustym logu transferu, Rosjanin zaklął pod nosem i ostro skręcił na portowy parking. Brak sygnału w tej minucie oznaczał tylko dwie możliwości: albo czytnik w krytycznym momencie po prostu się rozładował i program nie wystartował, albo kurierzy zostali przechwyceni przez estoński kontrwywiad jeszcze na pokładzie promu.</p>
+
+    <p>Mężczyzna zaparkował auto, wysiadł i szybkim krokiem ruszył w stronę wejścia do terminalu Länsiterminaali 2. Jego twarz była całkowicie spokojna, z boku wyglądał jak zwykły człowiek czekający na kogoś z rodziny, ale w żyłach buzowała mu adrenalina.</p>
+
+
+<p>Skoro automat zawiódł, misja uległa natychmiastowej modyfikacji. Musiał osobiście wejść do terminalu, zlokalizować parę Polaków i sprawdzić, co się stało. A jeśli zaszłaby taka potrzeba – zdobyć ten czytnik fizycznie, zanim przejmie go fińska policja.</p>
+
+<p>Wtopił się w tłum ludzi zmierzających do hali przypłynięć, bacznie obserwując bramki, z których za chwilę mieli zacząć wylewać się pierwsi pasażerowie.</p>
+
+
+    <div class="section-divider">***</div>
+
+
+
+  </main>
+
+</div>
+
+</body>
+</html>

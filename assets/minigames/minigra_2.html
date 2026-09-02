@@ -1,0 +1,342 @@
+<!-- sumowanie liczb -->
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bypass Energii - Rezystory</title>
+  <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+          background: #0a0f0d;
+          color: #4af626;
+          font-family: 'Courier New', monospace;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+          user-select: none;
+      }
+
+      .game-box {
+          width: 420px;
+          background: #020503;
+          border: 3px solid #165319;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 0 30px rgba(74, 246, 38, 0.15);
+      }
+
+      .header {
+          text-align: center;
+          margin-bottom: 15px;
+          border-bottom: 1px dashed #165319;
+          padding-bottom: 12px;
+      }
+
+      .header h1 { font-size: 18px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+
+      .instructions {
+          background: rgba(22, 83, 25, 0.15);
+          border: 1px solid #165319;
+          border-radius: 6px;
+          padding: 10px 12px;
+          font-size: 11px;
+          line-height: 1.5;
+          color: #8ae978;
+          margin-bottom: 15px;
+          text-align: left;
+      }
+      .instructions strong { color: #ffbb00; }
+
+      .stats-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-bottom: 15px;
+          background: #061008;
+          padding: 10px;
+          border-radius: 6px;
+          border: 1px solid #113a14;
+      }
+
+      .stat-item { text-align: center; }
+      .stat-label { font-size: 10px; color: #1f7a24; text-transform: uppercase; }
+      .stat-val { font-size: 22px; font-weight: bold; }
+      #targetVal { color: #ffbb00; }
+      #currentVal { color: #00ffff; }
+
+      .grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 10px;
+          margin-bottom: 15px;
+      }
+
+      .cell {
+          aspect-ratio: 1;
+          background: #0d1a10;
+          border: 2px solid #165319;
+          border-radius: 8px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 24px;
+          font-weight: bold;
+          color: #79f962;
+          cursor: pointer;
+          transition: all 0.15s ease;
+      }
+
+      .cell:hover {
+          background: #132a18;
+          border-color: #4af626;
+      }
+
+      .cell.selected {
+          background: #205c26;
+          color: #ffffff;
+          border-color: #00ffff;
+          box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
+          transform: scale(0.95);
+      }
+
+      .footer-info {
+          display: flex;
+          justify-content: space-between;
+          font-size: 11px;
+          color: #1f7a24;
+      }
+
+      .overlay {
+          display: none; position: fixed; inset: 0; background: rgba(2, 5, 3, 0.95);
+          z-index: 100; justify-content: center; align-items: center; flex-direction: column;
+      }
+      .overlay.active { display: flex; }
+      .overlay h2 { font-size: 26px; margin-bottom: 20px; text-align: center; text-transform: uppercase; }
+      .btn {
+          background: #4af626; color: #020503; border: 0; padding: 12px 28px;
+          font-family: inherit; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase;
+      }
+  </style>
+</head>
+<body>
+
+<div class="game-box">
+  <div class="header">
+    <h1>Bypass Rezystorów</h1>
+  </div>
+
+  <div class="instructions">
+    <strong>JAK GRAĆ:</strong> Wciśnij lewy przycisk myszy na dowolnym kafelku i <strong>przeciągnij linię</strong> po sąsiednich liczbach (pionowo, poziomo lub na ukos). Zsumuj je tak, aby wynik dał dokładnie wartość <strong>Cel (Target)</strong>. Puszczenie myszki przy złej sumie kosztuje 3s kary! Wracając na poprzedni kafelek cofasz ruch.
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-label">Cel (Target)</div>
+      <div class="stat-val" id="targetVal">0</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Suma wyboru</div>
+      <div class="stat-val" id="currentVal">0</div>
+    </div>
+  </div>
+
+  <div class="grid" id="numberGrid"></div>
+
+  <div class="footer-info">
+    <div>CZAS: <span id="timeVal" style="color:#ff3333; font-weight:bold;">30.0s</span></div>
+    <div>POZIOM: <span id="stageVal" style="color:#ffffff;">1/2</span></div>
+  </div>
+</div>
+
+<div class="overlay" id="endOverlay">
+  <h2 id="endTitle">ZALICZONE!</h2>
+  <button class="btn" onclick="restartGame()">Zagraj ponownie</button>
+</div>
+
+<script>
+  const gridElement = document.getElementById("numberGrid");
+  const targetDisplay = document.getElementById("targetVal");
+  const currentDisplay = document.getElementById("currentVal");
+  const timeDisplay = document.getElementById("timeVal");
+  const stageDisplay = document.getElementById("stageVal");
+  const endOverlay = document.getElementById("endOverlay");
+  const endTitle = document.getElementById("endTitle");
+
+  const GRID_SIZE = 4;
+  let gridData = [];
+  let selectedCells = [];
+  let isDrawing = false;
+
+  let targetSum = 0;
+  let currentSum = 0;
+  let timeLeft = 30;
+  let currentStage = 1;
+  let gameInterval = null;
+  let isGameOver = false;
+
+  function initGame() {
+    isGameOver = false;
+    endOverlay.classList.remove("active");
+    generateGrid();
+    calculateStageSettings();
+    startTimer();
+  }
+
+  function calculateStageSettings() {
+    stageDisplay.textContent = `${currentStage}/2`;
+    timeLeft = 30; // Stały czas 30s dla obu poziomów
+
+    const minTarget = 15 + (currentStage * 12);
+    const maxTarget = 30 + (currentStage * 18);
+    targetSum = Math.floor(Math.random() * (maxTarget - minTarget + 1)) + minTarget;
+    targetDisplay.textContent = targetSum;
+
+    currentSum = 0;
+    currentDisplay.textContent = currentSum;
+    selectedCells = [];
+  }
+
+  function generateGrid() {
+    gridElement.innerHTML = "";
+    gridData = [];
+
+    for (let r = 0; r < GRID_SIZE; r++) {
+      gridData[r] = [];
+      for (let c = 0; c < GRID_SIZE; c++) {
+        const val = Math.floor(Math.random() * 8) + 2;
+        gridData[r][c] = val;
+
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.textContent = val;
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+
+        cell.addEventListener("mousedown", (e) => startSelection(r, c, cell));
+        cell.addEventListener("mouseenter", (e) => extendSelection(r, c, cell));
+
+        gridElement.appendChild(cell);
+      }
+    }
+  }
+
+  function startSelection(r, c, element) {
+    if (isGameOver) return;
+    isDrawing = true;
+    selectedCells = [{ r, c, val: gridData[r][c] }];
+    element.classList.add("selected");
+    updateCurrentSum();
+  }
+
+  function extendSelection(r, c, element) {
+    if (!isDrawing || isGameOver) return;
+
+    const alreadySelected = selectedCells.some(cell => cell.r === r && cell.c === c);
+    if (alreadySelected) {
+      if (selectedCells.length > 1 && selectedCells[selectedCells.length - 2].r === r && selectedCells[selectedCells.length - 2].c === c) {
+        const popped = selectedCells.pop();
+        const lastCellElement = document.querySelector(`[data-row='${popped.r}'][data-col='${popped.c}']`);
+        if (lastCellElement) lastCellElement.classList.remove("selected");
+        updateCurrentSum();
+      }
+      return;
+    }
+
+    const last = selectedCells[selectedCells.length - 1];
+    const rowDiff = Math.abs(last.r - r);
+    const colDiff = Math.abs(last.c - c);
+
+    if (rowDiff <= 1 && colDiff <= 1) {
+      selectedCells.push({ r, c, val: gridData[r][c] });
+      element.classList.add("selected");
+      updateCurrentSum();
+    }
+  }
+
+  function endSelection() {
+    if (!isDrawing) return;
+    isDrawing = false;
+
+    if (currentSum === targetSum) {
+      if (currentStage === 2) {
+        endGame(true);
+      } else {
+        currentStage++;
+        generateGrid();
+        calculateStageSettings();
+      }
+    } else {
+      if (selectedCells.length > 1) {
+        timeLeft = Math.max(0, timeLeft - 3);
+        timeDisplay.style.color = "#ff0000";
+        setTimeout(() => { if(!isGameOver) timeDisplay.style.color = "#ff3333"; }, 500);
+      }
+
+      document.querySelectorAll(".cell").forEach(cell => cell.classList.remove("selected"));
+      selectedCells = [];
+      currentSum = 0;
+      currentDisplay.textContent = currentSum;
+    }
+  }
+
+  // Rejestrowane raz, poza generateGrid() — żeby nie mnożyć nasłuchów
+  // przy każdym przejściu do kolejnego poziomu / restarcie gry.
+  window.addEventListener("mouseup", endSelection);
+
+  function updateCurrentSum() {
+    currentSum = selectedCells.reduce((sum, cell) => sum + cell.val, 0);
+    currentDisplay.textContent = currentSum;
+
+    // Zmiana koloru tekstu w zależności od wyniku (bez dopisów matematycznych)
+    if (currentSum === targetSum) {
+      currentDisplay.style.color = "#33ff33";
+    } else if (currentSum > targetSum) {
+      currentDisplay.style.color = "#ff3333";
+    } else {
+      currentDisplay.style.color = "#00ffff";
+    }
+  }
+
+  function startTimer() {
+    clearInterval(gameInterval);
+    gameInterval = setInterval(() => {
+      timeLeft -= 0.1;
+      if (timeLeft <= 0) {
+        timeLeft = 0;
+        endGame(false);
+      }
+      timeDisplay.textContent = timeLeft.toFixed(1) + "s";
+    }, 100);
+  }
+
+  function endGame(success) {
+    isGameOver = true;
+    clearInterval(gameInterval);
+    isDrawing = false;
+
+    endOverlay.classList.add("active");
+    if (success) {
+      endTitle.textContent = "ZABEZPIECZONO SYSTEM!";
+      endTitle.style.color = "#4af626";
+
+      // Zgłoś ukończenie minigry do tablicy śledztwa (board.html),
+      // żeby odblokować kolejne wyzwanie i rozdział.
+      (window.opener || window.parent).postMessage({ type: "minigameComplete" }, "*");
+    } else {
+      endTitle.textContent = "PRZECIĄŻENIE USZKODZIŁO BYPASS!";
+      endTitle.style.color = "#ff3333";
+    }
+  }
+
+  function restartGame() {
+    currentStage = 1;
+    initGame();
+  }
+
+  initGame();
+</script>
+</body>
+</html>

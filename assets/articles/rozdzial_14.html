@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rozdział</title>
+  <style>
+      /* Reset podstawowych stylów */
+      *, *::before, *::after {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+      }
+
+      /* Ciemna, klasyczna stylistyka */
+      body {
+          background-color: #121212; /* Głęboka czerń tła */
+          color: #e0e0e0;           /* Stonowana biel tekstu */
+          font-family: 'Georgia', 'Times New Roman', Times, serif; /* Klasyczny krój książkowy */
+          line-height: 1.75;
+          letter-spacing: 0.01em;
+          padding: 40px 20px;
+          display: flex;
+          justify-content: center;
+      }
+
+      /* Kontener ograniczający szerokość tekstu dla łatwego czytania */
+      .book-container {
+          max-width: 680px;
+          width: 100%;
+      }
+
+      /* Nagłówek rozdziału */
+      header {
+          margin-bottom: 3rem;
+          text-align: center;
+      }
+
+      .chapter-number {
+          font-size: 1.2rem;
+          font-style: italic;
+          color: #b39ddb;            /* Subtelny fioletowy akcent */
+          margin-bottom: 0.5rem;
+          display: block;
+      }
+
+      h1.chapter-title {
+          font-size: 2.2rem;
+          line-height: 1.3;
+          color: #ffffff;
+          font-weight: normal;
+      }
+
+      /* Treść rozdziału */
+      .chapter-content {
+          font-size: 1.15rem;
+          text-align: justify;      /* Klasyczne wyrównanie tekstu */
+          text-justify: inter-word;
+      }
+
+      .chapter-content p {
+          margin-bottom: 1.25rem;
+      }
+
+      /* Inicjał (Drop Cap) dla pierwszego akapitu */
+      .chapter-content p:first-of-type::first-letter {
+          font-size: 3.5rem;
+          float: left;
+          line-height: 1;
+          padding-right: 8px;
+          color: #b39ddb;
+      }
+
+      /* Cytat / Myśli (opcjonalnie) */
+      blockquote {
+          font-style: italic;
+          margin: 2rem 1.5rem;
+          padding-left: 1rem;
+          border-left: 2px solid #b39ddb;
+          color: #b0b0b0;
+      }
+
+      /* Separator sekcji (gwiazdki - opcjonalnie) */
+      .section-divider {
+          text-align: center;
+          margin: 3rem 0;
+          font-size: 1.2rem;
+          letter-spacing: 0.5em;
+          color: #555555;
+      }
+
+      /* Dopasowanie do ekranów telefonów */
+      @media (max-width: 600px) {
+          body { padding: 20px 15px; }
+          h1.chapter-title { font-size: 1.8rem; }
+          .chapter-content { font-size: 1.05rem; text-align: left; }
+          .chapter-content p:first-of-type::first-letter { font-size: 3rem; }
+      }
+  </style>
+</head>
+<body>
+
+<div class="book-container">
+
+  <header>
+    <span class="chapter-number">Rozdział XIV</span>
+  </header>
+
+  <main class="chapter-content">
+
+    <p>Pomieszczenie sekcji cyberbezpieczeństwa fińskiej policji federalnej SUPO nie przypominało hollywoodzkich laboratoriów. Był to sterylny, klimatyzowany pokój w podziemiach komendy, w którym unosił się zapach ozonu i taniej, mocnej kawy.</p>
+
+    <p>Mäkinen i Saar stali za plecami fińskiego specjalisty ds. informatyki śledczej. Na antystatycznej macie leżał porysowany od upadku na asfalt Kindle Ewy. Przez gruby, ekranowany kabel USB był podłączony do specjalnego, czarnego urządzenia blokującego zapis danych, a stamtąd bezpośrednio do potężnej stacji roboczej z uruchomionym oprogramowaniem do analizy niskopoziomowej. Na trzech monitorach przed technikiem przewijały się tysiące linii kodu i struktury ukrytych partycji systemowych Linuxa, na którym bazował czytnik.</p>
+    <blockquote>– I jak, Heikki? – przerwał ciszę Mäkinen, pocierając zmęczoną twarz. – Co tam macie na tym dysku?</blockquote>
+
+    <p>Fin odsunął się od ekranu, przetarł oczy i wskazał kursorem myszy na podświetlony na czerwono sektor pamięci.</p>
+
+    <blockquote>– Fizyczny impakt i nagły reset zasilania uratowały wam skórę, Aleksander – zaczął technik. – Gdy urządzenie uderzyło o beton, system operacyjny zaliczył krytyczny błąd jądra. Stało się to dokładnie w tej samej sekundzie, w której ukryty skrypt odpalał procedurę self-wipe. Przez to nagłe zamrożenie, algorytm czyszczący zdążył nadpisać zerami tylko około czterdzieści procent przestrzeni dyskowej. Same pliki wywiadowcze z Tallinna są co prawda bezpowrotnie uszkodzone i nie odzyskamy z nich żadnego czytelnego dokumentu, ale...</blockquote>
+
+    <blockquote>– Ale sam program przetrwał w logach – dokończyła domyślnie Liis Saar.</blockquote>
+
+    <blockquote>– Dokładnie. Przekopaliśmy ukryte partycje i partycję wymiany. Zabezpieczyliśmy kompletny, nienaruszony kod źródłowy „Północnej Gwiazdy”, ukryty w strukturze katalogów systemowych. Widzimy pełne logi połączeń, unikalne sygnatury czasowe, a co najważniejsze: adres IP serwera proxy w Petersburgu, na który poszła paczka tuż przed wypadkiem. Rosjanie dostali dane, to fakt, ale ten czytnik to dla kontrwywiadu NATO kopalnia złota. Da nam wystarczająco dużo twardych dowodów cyfrowych, by namierzyć całą ich siatkę łącznikową w basenie Morza Bałtyckiego.</blockquote>
+
+    <p>Heikki odłączył bezpiecznie kabel USB i przesunął Kindle'a w stronę Mäkinena. Poza głębokimi, ostrymi rysami na etui, które na zawsze miały przypominać o helsińskim asfalcie, czytnik był w pełni sprawny.</p>
+
+    <blockquote>– System wstał, urządzenie działa, wyczyściliśmy je ze śladów złośliwego oprogramowania – podsumował Fin. – Możecie je oddać dziewczynie. Zaczynamy papierologię.</blockquote>
+
+    <p>Dla Ewy i Bartka kolejne kilka godzin zlało się w jeden, niekończący się ciąg szarych ścian, błysków lamp błyskowych i chłodnego, urzędowego przesłuchania.</p>
+
+<p>Procedura była bezwzględna. Fakt, że na płycie portu leżał trup rosyjskiego agenta, zdjął z nich status podejrzanych, ale automatycznie zamienił ich w kluczowych świadków w śledztwie o szpiegostwo międzynarodowe. Papiery puchły z godziny na godzinę. Fińscy śledczy z SUPO, ramię w ramię z estońskim KAPO, przesłuchiwali ich osobno, wielokrotnie wracając do tych samych szczegółów, porównując ich zeznania słowo po słowie.</p>
+
+    <blockquote>„Proszę opisać moment, w którym kupili państwo bilety.”</blockquote>
+
+    <blockquote>„Czy mieliście z kimś kontakt w Tallinnie?”</blockquote>
+
+    <blockquote>„Czy zostawiali państwo Kindle’a bez opieki w pokoju hotelu Kreutzwald?”</blockquote>
+<blockquote>„Czym przyjechaliście na terminal promowy?”</blockquote>
+
+    <p>Ewa czuła, że dotarła do granicy psychicznego wytrzymania. Każda minuta spędzona w zamkniętym pokoju, pod okiem kamer i milczących agentów w garniturach, ssała z niej resztki energii. Musiała podpisać dziesiątki oświadczeń o zachowaniu tajemnicy państwowej, protokołów z okazania zdjęć i wielostronicowych zeznań tłumaczonych z fińskiego na angielski i polski.</p>
+
+    <p>Bartek w pokoju obok przechodził przez to samo piekło. Gdy na chwilę pozwolono im się zobaczyć na korytarzu pod okiem uzbrojonych strażników, wyglądał jak cień samego siebie – blady, z podkrążonymi oczami.</p>
+
+    <p>Maszyna biurokratyczna mieliła ich powoli, weryfikując każdą sekundę ich wycieczki, każdy rachunek z karty kredytowej i każde połączenie telefoniczne z ostatnich pięciu dni. Służby musiały mieć absolutną, stuprocentową pewność, że ta dwójka to tylko podręcznikowe, tragiczne ofiary przypadku, zanim pozwolą im oficjalnie opuścić strefę zastrzeżoną.</p>
+
+    <p>Dopiero pod koniec dnia, gdy słońce nad Helsinkami zaczynało powoli chować się za horyzontem, w drzwiach pokoju przesłuchań stanął Aleksander Mäkinen. W ręku trzymał grubą, podpisaną przez prokuratora teczkę oraz małą, znajomą paczkę owiniętą w folię bąbelkową.</p>
+
+    <p>Mäkinen położył teczkę na metalowym blacie z głuchym, ciężkim stukotem. Przez dłuższą chwilę patrzył na Ciebie w milczeniu, a w jego zmęczonych oczach nie było już tej drapieżnej, zimnej podejrzliwości, która paraliżowała Cię na promie. Zostało tylko wyczerpanie faceta, który od kilkunastu godzin bił się z międzynarodowym kryzysem.</p>
+
+    <blockquote>— Wszystko podpisane. Jesteście wolni — powiedział cicho, po czym rozerwał folię bąbelkową i podał ci twój czytnik. — Wasze dokumenty, telefony i bilety powrotne są w teczce. Rząd Finlandii w ramach oficjalnych, choć nieoficjalnych przeprosin, przebukował wasz lot. Jutro macie bezpośredni rejs do Warszawy.</blockquote>
+
+    <p>Bierzesz Kindle'a do ręki. Jest chłodny, lekki, a porysowana obudowa z „Gwieździstą nocą” Van Gogha przypomina Ci o koszmarze na płycie portu.</p>
+
+    <blockquote>— Jest czysty? — Twój głos ledwo przechodzi przez ściśnięte gardło.</blockquote>
+
+    <blockquote>— Całkowicie. Nasi informatycy usunęli z niego każdą linijkę wrogiego kodu. To z powrotem zwykły czytnik książek — Mäkinen wyprostował się i po raz pierwszy uniósł kącik ust w czymś, co miało przypominać ludzki uśmiech. — Przykro mi, że wasz urlop zamienił się w film sensacyjny. Życzę spokojnego lotu do domu.</blockquote>
+
+    <p>Pół godziny później, trzymając Bartka pod rękę, opuszczasz ponure podziemia komendy. Gdy chłodne, nocne powietrze Helsinek uderza Cię w twarz, czujesz, jak z Twojej klatki piersiowej powoli schodzi gigantyczny, gniotący ciężar.</p>
+
+    <p>To już koniec. Wygraliście. Wracacie do domu. </p>
+
+    <div class="section-divider">***</div>
+
+
+
+  </main>
+
+</div>
+
+</body>
+</html>

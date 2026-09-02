@@ -1,0 +1,327 @@
+<!-- lockpick -->
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dekoder Sygnału - Lockpicking</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0d0614;
+  color: #bd93f9;
+  font-family: 'Courier New', monospace;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  user-select: none;
+}
+
+.game-box {
+  width: 420px;
+  background: #05020a;
+  border: 3px solid #6272a4;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 30px rgba(189, 147, 249, 0.15);
+  text-align: center;
+}
+
+.header {
+  margin-bottom: 15px;
+  border-bottom: 1px dashed #6272a4;
+  padding-bottom: 12px;
+}
+.header h1 { font-size: 18px; letter-spacing: 2px; text-transform: uppercase; color: #ff79c6; margin-bottom: 5px; }
+
+.instructions {
+  background: rgba(98, 114, 164, 0.1);
+  border: 1px solid #6272a4;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #f8f8f2;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.instructions strong { color: #ffb86c; }
+
+.canvas-container {
+  position: relative;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+#lockCanvas {
+  background: #030107;
+  border-radius: 50%;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+}
+
+.status-panel {
+  display: flex;
+  justify-content: space-between;
+  background: #11091c;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #44475a;
+  font-size: 13px;
+}
+.status-label { color: #6272a4; text-transform: uppercase; font-size: 10px; margin-bottom: 2px; }
+.status-val { font-weight: bold; font-size: 16px; }
+
+.overlay {
+  display: none; position: fixed; inset: 0; background: rgba(5, 2, 10, 0.96);
+  z-index: 100; justify-content: center; align-items: center; flex-direction: column;
+}
+.overlay.active { display: flex; }
+.overlay h2 { font-size: 26px; margin-bottom: 20px; text-align: center; text-transform: uppercase; }
+.btn {
+  background: #50fa7b; color: #282a36; border: 0; padding: 12px 28px;
+  font-family: inherit; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase;
+  box-shadow: 0 0 10px rgba(80, 250, 123, 0.4);
+}
+</style>
+</head>
+<body>
+
+<div class="game-box">
+  <div class="header">
+    <h1>Otwieranie zamka wytrychem</h1>
+  </div>
+
+  <div class="instructions">
+    <strong>JAK GRAĆ:</strong> Wciśnij <strong>SPACJĘ</strong>, gdy wirujący fioletowy wskaźnik znajdzie się wewnątrz <strong>czerwonej strefy</strong>. Uważaj: wskaźnik ma lekkie opóźnienie hamowania! Jeden błąd resetuje cały postęp do poziomu 1.
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="lockCanvas" width="260" height="260"></canvas>
+  </div>
+
+  <div class="status-panel">
+    <div style="text-align: left;">
+      <div class="status-label">Status śluzy</div>
+      <div class="status-val" id="stageText" style="color: #ffb86c;">ZAPADKA 1/3</div>
+    </div>
+    <div style="text-align: right;">
+      <div class="status-label">Working..</div>
+      <div class="status-val" id="lockStatus" style="color: #8be9fd;">OCZEKIWANIE...</div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="endOverlay">
+  <h2 id="endTitle">ZALICZONE!</h2>
+  <button class="btn" onclick="restartGame()">Zagraj ponownie</button>
+</div>
+
+<script>
+const canvas = document.getElementById("lockCanvas");
+const ctx = canvas.getContext("2d");
+const stageText = document.getElementById("stageText");
+const lockStatus = document.getElementById("lockStatus");
+const endOverlay = document.getElementById("endOverlay");
+const endTitle = document.getElementById("endTitle");
+
+let currentStage = 1;
+let isGameOver = false;
+
+// Parametry mechaniki koła
+let indicatorAngle = 0;       
+let indicatorSpeed = 0.045;   
+let zoneStartAngle = 0;       
+let zoneWidthAngle = 0.45;    
+
+let isCheckingClick = false;
+let targetStopAngle = null;
+
+function initGame() {
+  isGameOver = false;
+  isCheckingClick = false;
+  targetStopAngle = null;
+  endOverlay.classList.remove("active");
+  lockStatus.textContent = "...";
+  lockStatus.style.color = "#8be9fd";
+  
+  setupStage();
+  requestAnimationFrame(gameLoop);
+}
+
+function setupStage() {
+  stageText.textContent = `ZAPADKA ${currentStage}/3`;
+  
+  // Konfiguracja 3 poziomów trudności
+  if (currentStage === 1) {
+    indicatorSpeed = 0.045;   // W prawo, średnio szybko
+    zoneWidthAngle = 0.45;   // Szeroka strefa (ok. 25 stopni)
+  } else if (currentStage === 2) {
+    indicatorSpeed = 0.075;   // W prawo, szybko!
+    zoneWidthAngle = 0.30;   // Wąska strefa (ok. 17 stopni)
+  } else {
+    indicatorSpeed = -0.07;   // ZMIANA KIERUNKU: W lewo (ujemna prędkość)
+    zoneWidthAngle = 0.22;   // Ekstremalnie wąska strefa (ok. 12 stopni)
+  }
+  
+  // Losowanie pozycji strefy (z dala od aktualnego kąta startowego)
+  zoneStartAngle = Math.random() * (Math.PI * 1.4) + Math.PI * 0.3;
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
+    e.preventDefault(); // zawsze blokuj scroll strony spacją
+    if (e.repeat || isGameOver || isCheckingClick) return; // ignoruj auto-powtarzanie klawisza
+    triggerLockAttempt();
+  }
+});
+
+canvas.addEventListener("mousedown", () => {
+  if (!isGameOver && !isCheckingClick) {
+    triggerLockAttempt();
+  }
+});
+
+function triggerLockAttempt() {
+  isCheckingClick = true;
+  // Efekt inercji uwzględnia teraz kierunek obrotu (znak prędkości)
+  const inertiaFactor = indicatorSpeed * 2.2; 
+  targetStopAngle = (indicatorAngle + inertiaFactor) % (Math.PI * 2);
+  if (targetStopAngle < 0) targetStopAngle += Math.PI * 2; // Normalizacja dla obrotu w lewo
+  
+  setTimeout(() => {
+    checkSuccess(targetStopAngle);
+  }, 120); 
+}
+
+function checkSuccess(angleToCheck) {
+  // Normalizacja kątów do przedziału 0 do 2*PI
+  const normAngle = (angleToCheck % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+  const zoneEnd = (zoneStartAngle + zoneWidthAngle) % (Math.PI * 2);
+  
+  let hit = false;
+  
+  if (zoneStartAngle < zoneEnd) {
+    if (normAngle >= zoneStartAngle && normAngle <= zoneEnd) hit = true;
+  } else {
+    if (normAngle >= zoneStartAngle || normAngle <= zoneEnd) hit = true;
+  }
+  
+  if (hit) {
+    lockStatus.textContent = "ZABEZPIECZONO!";
+    lockStatus.style.color = "#50fa7b";
+    
+    setTimeout(() => {
+      if (currentStage === 3) {
+        endGame(true);
+      } else {
+        currentStage++;
+        setupStage();
+        // krótka chwila zanim gracz znów może nacisnąć spację —
+        // żeby zdążył zobaczyć nową pozycję strefy
+        setTimeout(() => { isCheckingClick = false; }, 400);
+      }
+    }, 600);
+  } else {
+    // Reset do poziomu 1 przy błędzie
+    lockStatus.textContent = "ALARM! RESET...";
+    lockStatus.style.color = "#ff5555";
+    
+    setTimeout(() => {
+      currentStage = 1;
+      isCheckingClick = false;
+      setupStage();
+      lockStatus.textContent = "SKANOWANIE...";
+      lockStatus.style.color = "#8be9fd";
+    }, 1000);
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const radius = 100;
+  
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.strokeStyle = "#282a36";
+  ctx.lineWidth = 14;
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, zoneStartAngle, zoneStartAngle + zoneWidthAngle);
+  ctx.strokeStyle = "#ff5555";
+  ctx.lineWidth = 16;
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, zoneStartAngle, zoneStartAngle + zoneWidthAngle);
+  ctx.strokeStyle = "rgba(255, 85, 85, 0.3)";
+  ctx.lineWidth = 26;
+  ctx.stroke();
+
+  let currentRenderAngle = isCheckingClick ? targetStopAngle : indicatorAngle;
+  
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(currentRenderAngle);
+  
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(radius + 15, 0);
+  ctx.strokeStyle = isCheckingClick ? "#ff79c6" : "#bd93f9";
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.arc(radius, 0, 6, 0, Math.PI * 2);
+  ctx.fillStyle = "#ff79c6";
+  ctx.fill();
+  ctx.restore();
+  
+  ctx.beginPath();
+  ctx.arc(cx, cy, 25, 0, Math.PI * 2);
+  ctx.fillStyle = "#1d122b";
+  ctx.fill();
+  ctx.strokeStyle = "#6272a4";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function gameLoop() {
+  if (isGameOver) return;
+  
+  if (!isCheckingClick) {
+    indicatorAngle = (indicatorAngle + indicatorSpeed) % (Math.PI * 2);
+    if (indicatorAngle < 0) indicatorAngle += Math.PI * 2;
+  }
+  
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+function endGame(success) {
+  isGameOver = true;
+  endOverlay.classList.add("active");
+  if (success) {
+    endTitle.textContent = "SYSTEM DEKODOWANIA ODBLOKOWANY!";
+    endTitle.style.color = "#50fa7b";
+
+    // Zgłoś ukończenie minigry do tablicy śledztwa (board.html),
+    // żeby odblokować kolejne wyzwanie i rozdział.
+    (window.opener || window.parent).postMessage({ type: "minigameComplete" }, "*");
+  }
+}
+
+function restartGame() {
+  currentStage = 1;
+  initGame();
+}
+
+initGame();
+</script>
+</body>
+</html>
